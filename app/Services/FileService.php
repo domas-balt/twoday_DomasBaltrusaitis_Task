@@ -5,28 +5,15 @@ namespace App\Services;
 use Exception;
 
 class FileService{
-    public function ReadDataFromFile(): array
+    public static function ReadDataFromFile(): array
     {
-        $fileName = "../Files/hyphen.txt";
+        $fileName = dirname(__DIR__, 1) . "/Files/hyphen.txt";
 
-        if(!file_exists($fileName) || !is_readable($fileName)){
-            throw new Exception("File does not exist or is not readable");
+        if(file_exists($fileName) && is_readable($fileName)){
+            return file($fileName);
         }
-
-        $file = fopen($fileName, "r");
-        if($file){
-            $hyphenArray = explode("\n", fread($file, filesize($fileName)));
+        else {
+            throw new Exception("File not found or not readable");
         }
-
-        fclose($file);
-
-        if (!empty($hyphenArray)) {
-            return $hyphenArray;
-        }
-
-        return [];
     }
 }
-
-$app = new FileService();
-$app->ReadDataFromFile();
