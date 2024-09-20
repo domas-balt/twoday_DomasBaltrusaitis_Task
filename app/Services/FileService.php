@@ -12,8 +12,7 @@ class FileService{
         if(file_exists($fileName) && is_readable($fileName)){
             return file($fileName);
         }
-        else {
-            throw new Exception("File not found or not readable");
-        }
+
+        throw new Exception("File not found or not readable");
     }
 }
