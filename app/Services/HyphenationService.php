@@ -76,8 +76,6 @@ class HyphenationService {
                 }
 
                 if ($successfulMatchCount === count($patternWithoutNumbers)) {
-                    echo "Susimatchino sekmingai sitas: " . $pattern . "\n";
-                    print_r($patternPositions);
                     self::BuildWordWithNumbers($patternPositions, $fullPatternChars);
                     break;
                 }
@@ -133,7 +131,6 @@ class HyphenationService {
         }
 
         ksort($patternWithCharPositionsExpanded);
-        print_r($patternWithCharPositionsExpanded);
 
         foreach ($patternWithCharPositionsExpanded as $key => $value) {
             if (!isset($this->finalWordArray[$key])){
@@ -162,7 +159,9 @@ class HyphenationService {
 
         $this->finalProcessedWord = str_replace(".", "", $this->finalProcessedWord);
         $this->finalProcessedWord = str_replace(" ", "", $this->finalProcessedWord);
+        $this->finalProcessedWord = ltrim($this->finalProcessedWord, "-");
+        $this->finalProcessedWord = rtrim($this->finalProcessedWord, "-");
 
-        print_r($this->finalProcessedWord);
+        print_r($this->finalProcessedWord . "\n");
     }
 }
