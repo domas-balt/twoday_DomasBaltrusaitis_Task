@@ -4,9 +4,11 @@ namespace App;
 
 require_once 'Services/FileService.php';
 require_once 'Services/HyphenationService.php';
+require_once 'Services/ResultVisualizationService.php';
 
 use App\Services\FileService;
 use App\Services\HyphenationService;
+use App\Services\ResultVisualizationService;
 
 class Main{
 
@@ -24,6 +26,9 @@ class Main{
         $hyphenationService->FindSyllables();
 
         $finalHyphenatedWord = $hyphenationService->GetFinalWord();
+
+        ResultVisualizationService::VisualizeResults($finalHyphenatedWord);
+
         $timerEnd = hrtime(true);
 
         echo "The process took: " . ($timerEnd - $timerStart) / 1000000 . "ms.\n";

@@ -41,9 +41,7 @@ class HyphenationService {
             }
         }
 
-        echo "Initial selected syllables:\n";
         foreach ($this->finalHyphenArray as $key => $value) {
-            print($this->hyphenArray[$key]);
             $fullPatternArray[$key] = $this->hyphenArray[$key];
         }
 
@@ -93,7 +91,7 @@ class HyphenationService {
 
         $this->finalWordArray = $this->finalWordArray + $wordToHyphenateExpandedArray;
         ksort($this->finalWordArray);
-        print_r($this->finalWordArray);
+        print_r(implode('', $this->finalWordArray) . "\n");
         self::FinalProcessing();
     }
 
@@ -169,13 +167,6 @@ class HyphenationService {
         }
 
         $this->finalProcessedWord = implode($this->finalWordArray);
-
-        $this->finalProcessedWord = str_replace(".", "", $this->finalProcessedWord);
-        $this->finalProcessedWord = str_replace(" ", "", $this->finalProcessedWord);
-        $this->finalProcessedWord = ltrim($this->finalProcessedWord, "-");
-        $this->finalProcessedWord = rtrim($this->finalProcessedWord, "-");
-
-        print_r($this->finalProcessedWord . "\n");
     }
 
     public function GetFinalWord() : string{
