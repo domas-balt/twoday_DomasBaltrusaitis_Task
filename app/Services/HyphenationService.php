@@ -7,6 +7,7 @@ class HyphenationService {
     private String $wordToHyphenate;
     private String $initialWord;
     private array $hyphenArray;
+    private array $expandedLetterArray;
     private array $finalHyphenArray;
     private array $finalWordArray;
     private string $finalProcessedWord;
@@ -19,6 +20,7 @@ class HyphenationService {
         $this->finalHyphenArray = [];
         $this->finalWordArray = [];
         $this->finalProcessedWord = '';
+        $this->expandedLetterArray = [];
     }
 
     public function FindSyllables() : void
@@ -82,6 +84,15 @@ class HyphenationService {
             }
         }
         ksort($this->finalWordArray);
+        ksort($this->expandedLetterArray);
+        $wordToHyphenateSplit = str_split($this->wordToHyphenate);
+        $wordToHyphenateExpandedArray = [];
+        foreach ($wordToHyphenateSplit as $key => $wordToHyphenateChar) {
+            $wordToHyphenateExpandedArray[$key * 2] = $wordToHyphenateChar;
+        }
+
+        $this->finalWordArray = $this->finalWordArray + $wordToHyphenateExpandedArray;
+        ksort($this->finalWordArray);
         print_r($this->finalWordArray);
         self::FinalProcessing();
     }
@@ -118,6 +129,7 @@ class HyphenationService {
         $patternWithCharPositionsExpanded = [];
         foreach ($patternWithCharPositions as $key => $patternCharNoNumber) {
             $patternWithCharPositionsExpanded[$key * 2] = $patternCharNoNumber;
+            $this->expandedLetterArray[$key * 2] = $patternCharNoNumber;
         }
 
         $iterationDoubleKey = array_key_first($patternWithCharPositionsExpanded);

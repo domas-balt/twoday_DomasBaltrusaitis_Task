@@ -17,7 +17,7 @@ class Main{
         //$word = strtolower($word);
 
         $timerStart = hrtime(true);
-        $word = "smart";
+        $word = "masterful";
         $hyphenArray = FileService::ReadDataFromFile();
 
         $hyphenationService = new HyphenationService($word, $hyphenArray);
