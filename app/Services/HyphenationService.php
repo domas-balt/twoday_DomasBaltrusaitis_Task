@@ -137,6 +137,7 @@ class HyphenationService {
         for ($i = 0; $i < count($fullPattern); $i++) {
             if (is_numeric($fullPattern[$i])) {
                 $patternWithCharPositionsExpanded[$iterationDoubleKey - 1] = $fullPattern[$i];
+                continue;
             }
 
             $iterationDoubleKey = $iterationDoubleKey + 2;
@@ -175,5 +176,9 @@ class HyphenationService {
         $this->finalProcessedWord = rtrim($this->finalProcessedWord, "-");
 
         print_r($this->finalProcessedWord . "\n");
+    }
+
+    public function GetFinalWord() : string{
+        return $this->finalProcessedWord;
     }
 }

@@ -13,15 +13,17 @@ class Main{
     public function run(): void
     {
         echo "Enter the word you want to hyphenate:\n";
-        //$word = trim(fgets(STDIN));
-        //$word = strtolower($word);
+        $word = trim(fgets(STDIN));
+        $word = strtolower($word);
 
+        $word = "discombobulated";
         $timerStart = hrtime(true);
-        $word = "masterful";
         $hyphenArray = FileService::ReadDataFromFile();
 
         $hyphenationService = new HyphenationService($word, $hyphenArray);
         $hyphenationService->FindSyllables();
+
+        $finalHyphenatedWord = $hyphenationService->GetFinalWord();
         $timerEnd = hrtime(true);
 
         echo "The process took: " . ($timerEnd - $timerStart) / 1000000 . "ms.\n";
