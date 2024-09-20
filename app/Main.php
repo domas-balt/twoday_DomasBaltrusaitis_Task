@@ -13,13 +13,11 @@ class Main{
     public function run(): void
     {
         echo "Enter the word you want to hyphenate:\n";
-        //$word = trim(fgets(STDIN));
-        $word = "mistranslate";
+        $word = trim(fgets(STDIN));
         $hyphenArray = FileService::ReadDataFromFile();
 
         $hyphenationService = new HyphenationService($word, $hyphenArray);
         $hyphenationService->FindSyllables();
-        //print_r($hyphenArray);
     }
 }
 
