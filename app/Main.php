@@ -14,15 +14,16 @@ class Main{
 
     public function run(): void
     {
-        echo "Enter the word you want to hyphenate:\n";
-        $word = trim(fgets(STDIN));
-        $word = strtolower($word);
+//        echo "Enter the word you want to hyphenate:\n";
+//        $word = trim(fgets(STDIN));
+//        $word = strtolower($word);
 
+        $word = "polination";
         $timerStart = hrtime(true);
         $hyphenArray = FileService::ReadDataFromFile();
 
         $hyphenationService = new HyphenationService($word, $hyphenArray);
-        $hyphenationService->FindSyllables();
+        $hyphenationService->HyphenateWord();
 
         $finalHyphenatedWord = $hyphenationService->GetFinalWord();
 

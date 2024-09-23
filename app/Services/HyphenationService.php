@@ -5,10 +5,10 @@ namespace App\Services;
 class HyphenationService {
 
     private String $wordToHyphenate;
-    private String $initialWord;
     private array $hyphenArray;
     private array $expandedLetterArray;
-    private array $finalHyphenArray;
+    private array $patternWithNumbersArray;
+    private array $selectedSyllableArray;
     private array $finalWordArray;
     private string $finalProcessedWord;
 
@@ -16,45 +16,53 @@ class HyphenationService {
     {
         $this->hyphenArray = $hyphenArray;
         $this->wordToHyphenate = $wordToHyphenate;
-        $this->initialWord = $wordToHyphenate;
-        $this->finalHyphenArray = [];
+        $this->selectedSyllableArray = [];
         $this->finalWordArray = [];
         $this->finalProcessedWord = '';
         $this->expandedLetterArray = [];
+        $this->patternWithNumbersArray = [];
     }
 
-    public function FindSyllables() : void
+    public function HyphenateWord() : void{
+        self::FindSyllables();
+        self::FindSyllablePositions();
+        self::MergeSyllablesAndWordPositionArrays();
+        self::FinalProcessing();
+    }
+
+    private function FindSyllables() : void
     {
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->hyphenArray);
-        $fullPatternArray = [];
 
-        // FIND CORRECT SYLLABLES
         foreach ($arrayWithoutNumbers as $key => $syllable) {
             if ($this->IsFirstSyllable($syllable) && str_starts_with($this->wordToHyphenate, substr($syllable, 1))) {
-                $this->finalHyphenArray[$key] = $syllable;
+                $this->selectedSyllableArray[$key] = $syllable;
             }
             if (!$this->IsFirstSyllable($syllable) && !$this->IsLastSyllable($syllable) && str_contains($this->wordToHyphenate, $syllable)) {
-                $this->finalHyphenArray[$key] = $syllable;
+                $this->selectedSyllableArray[$key] = $syllable;
             }
             if ($this->IsLastSyllable($syllable) && str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))) {
-                $this->finalHyphenArray[$key] = $syllable;
+                $this->selectedSyllableArray[$key] = $syllable;
             }
         }
 
-        foreach ($this->finalHyphenArray as $key => $value) {
-            $fullPatternArray[$key] = $this->hyphenArray[$key];
+        foreach ($this->selectedSyllableArray as $key => $value) {
+            $this->patternWithNumbersArray[$key] = $this->hyphenArray[$key];
         }
+    }
 
+    private function FindSyllablePositions() : void {
         $this->wordToHyphenate = "." . $this->wordToHyphenate . ".";
         $wordCharacterArray = str_split($this->wordToHyphenate);
-        $preCleanUpCharacterArray = [];
 
-        foreach ($this->finalHyphenArray as $key => $pattern) {
+        foreach ($this->selectedSyllableArray as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->RemoveNumbersFromString($pattern));
-            $fullPatternChars = str_split(str_replace("\n","",$fullPatternArray[$key]));
+            $fullPatternChars = str_split(str_replace("\n","",$this->patternWithNumbersArray[$key]));
+
             $successfulMatchCount = 0;
             $comparisonBuffer = 0;
             $currentIndex = 0;
+
             $patternPositions = [];
 
             while ($successfulMatchCount < count($patternWithoutNumbers)) {
@@ -81,8 +89,12 @@ class HyphenationService {
                 }
             }
         }
+    }
+
+    private function MergeSyllablesAndWordPositionArrays() : void {
         ksort($this->finalWordArray);
         ksort($this->expandedLetterArray);
+        
         $wordToHyphenateSplit = str_split($this->wordToHyphenate);
         $wordToHyphenateExpandedArray = [];
 
@@ -92,40 +104,12 @@ class HyphenationService {
 
         $this->finalWordArray = $this->finalWordArray + $wordToHyphenateExpandedArray;
         ksort($this->finalWordArray);
-        print_r(implode('', $this->finalWordArray) . "\n");
-        self::FinalProcessing();
-    }
-
-
-    private function FilterOutNumbersFromArray($arrayToFilter) : array{
-        foreach ($arrayToFilter as $key => $wordToFilter){
-            $arrayToFilter[$key] = self::RemoveNumbersFromString($wordToFilter);
-        }
-
-        return $arrayToFilter;
-    }
-
-    private function RemoveNumbersFromString(String $word) : String{
-        return preg_replace("/[^a-zA-Z.]/", "", $word);
-    }
-
-    private function IsFirstSyllable(String $word) : bool{
-        if ((strpos($word, ".") === 0)) {
-            return true;
-        }
-        return false;
-    }
-
-    private function IsLastSyllable(String $word) : bool{
-        if (str_ends_with($word, ".")) {
-            return true;
-        }
-        return false;
     }
 
     private function BuildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern) : void{
 
         $patternWithCharPositionsExpanded = [];
+
         foreach ($patternWithCharPositions as $key => $patternCharNoNumber) {
             $patternWithCharPositionsExpanded[$key * 2] = $patternCharNoNumber;
             $this->expandedLetterArray[$key * 2] = $patternCharNoNumber;
@@ -153,6 +137,32 @@ class HyphenationService {
                 $this->finalWordArray[$key] = max($value, $this->finalWordArray[$key]);
             }
         }
+    }
+
+    private function FilterOutNumbersFromArray($arrayToFilter) : array{
+        foreach ($arrayToFilter as $key => $wordToFilter){
+            $arrayToFilter[$key] = self::RemoveNumbersFromString($wordToFilter);
+        }
+
+        return $arrayToFilter;
+    }
+
+    private function RemoveNumbersFromString(String $word) : String{
+        return preg_replace("/[^a-zA-Z.]/", "", $word);
+    }
+
+    private function IsFirstSyllable(String $word) : bool{
+        if ((strpos($word, ".") === 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    private function IsLastSyllable(String $word) : bool{
+        if (str_ends_with($word, ".")) {
+            return true;
+        }
+        return false;
     }
 
     private function FinalProcessing() : void{
