@@ -2,9 +2,7 @@
 
 namespace App;
 
-require_once 'Services/FileService.php';
-require_once 'Services/HyphenationService.php';
-require_once 'Services/ResultVisualizationService.php';
+require_once 'Autoloader.php';
 
 use App\Services\FileService;
 use App\Services\HyphenationService;
@@ -14,11 +12,12 @@ class Main{
 
     public function run(): void
     {
-//        echo "Enter the word you want to hyphenate:\n";
-//        $word = trim(fgets(STDIN));
-//        $word = strtolower($word);
+        echo "Enter the word you want to hyphenate:\n";
+        $word = trim(fgets(STDIN));
+        $word = strtolower($word);
 
-        $word = "polination";
+        spl_autoload_register("\\App\\Autoloader::CustomAutoloader");
+
         $timerStart = hrtime(true);
         $hyphenArray = FileService::ReadDataFromFile();
 
