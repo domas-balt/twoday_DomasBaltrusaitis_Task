@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Interfaces\IHyphenationService;
 
-class HyphenationService implements IHyphenationService {
+class HyphenationService implements IHyphenationService
+{
 
     private String $wordToHyphenate;
     private array $syllableArray;

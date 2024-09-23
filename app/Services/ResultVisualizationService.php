@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-class ResultVisualizationService {
+class ResultVisualizationService
+{
     public static function visualizeResults(string $finalWord) : void
     {
         $finalWord = self::processFinalWord($finalWord);

@@ -4,7 +4,8 @@ namespace App\Services;
 
 use Exception;
 
-class FileService{
+class FileService
+{
     private const string FILE_NAME = "/Files/hyphen.txt";
     public static function readDataFromFile(): array
     {

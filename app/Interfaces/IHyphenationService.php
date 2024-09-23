@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
-interface IHyphenationService{
+interface IHyphenationService
+{
     public function HyphenateWord();
 }

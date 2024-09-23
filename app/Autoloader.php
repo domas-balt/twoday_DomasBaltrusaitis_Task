@@ -2,7 +2,8 @@
 
 namespace App;
 
-class Autoloader {
+class Autoloader
+{
     protected static string $fileExtension = '.php';
     protected static string $filePath = __DIR__;
 

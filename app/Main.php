@@ -4,12 +4,13 @@ namespace App;
 
 require_once 'Autoloader.php';
 
+use App\Logger\Logger;
 use App\Services\FileService;
 use App\Services\HyphenationService;
 use App\Services\ResultVisualizationService;
 
-class Main{
-
+class Main
+{
     public function run(): void
     {
         echo "Enter the word you want to hyphenate:\n";
