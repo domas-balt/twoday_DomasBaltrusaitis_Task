@@ -9,11 +9,9 @@ class ResultVisualizationService {
     }
 
     private static function ProcessFinalWord(string $finalWord) : string{
-        //        print_r(implode('', $this->finalWordArray) . "\n");
         $finalWord = str_replace(".", "", $finalWord);
         $finalWord = str_replace(" ", "", $finalWord);
         $finalWord = ltrim($finalWord, "-");
-        $finalWord = rtrim($finalWord, "-");
-        return $finalWord;
+        return rtrim($finalWord, "-");
     }
 }
