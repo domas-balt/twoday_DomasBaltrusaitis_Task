@@ -85,6 +85,7 @@ class HyphenationService {
         ksort($this->expandedLetterArray);
         $wordToHyphenateSplit = str_split($this->wordToHyphenate);
         $wordToHyphenateExpandedArray = [];
+
         foreach ($wordToHyphenateSplit as $key => $wordToHyphenateChar) {
             $wordToHyphenateExpandedArray[$key * 2] = $wordToHyphenateChar;
         }

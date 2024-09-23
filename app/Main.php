@@ -18,7 +18,6 @@ class Main{
         $word = trim(fgets(STDIN));
         $word = strtolower($word);
 
-        $word = "discombobulated";
         $timerStart = hrtime(true);
         $hyphenArray = FileService::ReadDataFromFile();
 
