@@ -19,9 +19,9 @@ class Main{
         spl_autoload_register("\\App\\Autoloader::CustomAutoloader");
 
         $timerStart = hrtime(true);
-        $hyphenArray = FileService::ReadDataFromFile();
+        $syllableArray = FileService::ReadDataFromFile();
 
-        $hyphenationService = new HyphenationService($word, $hyphenArray);
+        $hyphenationService = new HyphenationService($word, $syllableArray);
         $hyphenationService->HyphenateWord();
 
         $finalHyphenatedWord = $hyphenationService->GetFinalWord();

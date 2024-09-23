@@ -19,9 +19,9 @@ class HyphenationService implements IHyphenationService {
     {
         $this->syllableArray = $hyphenArray;
         $this->wordToHyphenate = $wordToHyphenate;
+        $this->finalProcessedWord = '';
         $this->selectedSyllableArray = [];
         $this->finalWordArray = [];
-        $this->finalProcessedWord = '';
         $this->doubledIndexWordArray = [];
         $this->patternWithNumbersArray = [];
         $this->doubledIndexPatternArray = [];
