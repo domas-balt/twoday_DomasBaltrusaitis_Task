@@ -40,16 +40,19 @@ class HyphenationService implements IHyphenationService {
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllableArray);
 
         foreach ($arrayWithoutNumbers as $key => $syllable) {
-            if ($this->isFirstSyllable($syllable)
-                && str_starts_with($this->wordToHyphenate, substr($syllable, 1))) {
+            if ($this->isFirstSyllable($syllable) &&
+                str_starts_with($this->wordToHyphenate, substr($syllable, 1))) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
-            if (!$this->isFirstSyllable($syllable) && !$this->isLastSyllable($syllable)
-                && str_contains($this->wordToHyphenate, $syllable)) {
+
+            if (!$this->isFirstSyllable($syllable) &&
+                !$this->isLastSyllable($syllable) &&
+                str_contains($this->wordToHyphenate, $syllable)) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
-            if ($this->isLastSyllable($syllable)
-                && str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))) {
+
+            if ($this->isLastSyllable($syllable) &&
+                str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
         }
@@ -75,13 +78,14 @@ class HyphenationService implements IHyphenationService {
             $patternPositions = [];
 
             while ($successfulMatchCount < count($patternWithoutNumbers)) {
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
-                    !== $patternWithoutNumbers[$currentIndex]) {
+                if ($wordCharacterArray[$comparisonBuffer + $currentIndex] !==
+                    $patternWithoutNumbers[$currentIndex]) {
                     $successfulMatchCount = 0;
                     $patternPositions = [];
                 }
 
-                if($wordCharacterArray[$comparisonBuffer + $currentIndex] === $patternWithoutNumbers[$currentIndex]){
+                if($wordCharacterArray[$comparisonBuffer + $currentIndex] ===
+                    $patternWithoutNumbers[$currentIndex]){
                     $successfulMatchCount++;
                     $patternPositions[$comparisonBuffer + $currentIndex] = $patternWithoutNumbers[$currentIndex];
                 }
@@ -119,7 +123,6 @@ class HyphenationService implements IHyphenationService {
 
     private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern) : void
     {
-
         $this->doubledIndexPatternArray = [];
 
         foreach ($patternWithCharPositions as $key => $patternCharNoNumber) {
@@ -145,7 +148,9 @@ class HyphenationService implements IHyphenationService {
                 $this->finalWordArray[$key] = $value;
             }
 
-            if (isset($this->finalWordArray[$key]) && is_numeric($value) && is_numeric($this->finalWordArray[$key])){
+            if (isset($this->finalWordArray[$key]) &&
+                is_numeric($value) &&
+                is_numeric($this->finalWordArray[$key])) {
                 $this->finalWordArray[$key] = max($value, $this->finalWordArray[$key]);
             }
         }
