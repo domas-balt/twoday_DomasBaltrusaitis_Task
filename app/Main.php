@@ -19,14 +19,14 @@ class Main{
         spl_autoload_register("\\App\\Autoloader::CustomAutoloader");
 
         $timerStart = hrtime(true);
-        $syllableArray = FileService::ReadDataFromFile();
+        $syllableArray = FileService::readDataFromFile();
 
         $hyphenationService = new HyphenationService($word, $syllableArray);
-        $hyphenationService->HyphenateWord();
+        $hyphenationService->hyphenateWord();
 
-        $finalHyphenatedWord = $hyphenationService->GetFinalWord();
+        $finalHyphenatedWord = $hyphenationService->getFinalWord();
 
-        ResultVisualizationService::VisualizeResults($finalHyphenatedWord);
+        ResultVisualizationService::visualizeResults($finalHyphenatedWord);
 
         $timerEnd = hrtime(true);
 

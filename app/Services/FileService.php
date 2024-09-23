@@ -5,10 +5,10 @@ namespace App\Services;
 use Exception;
 
 class FileService{
-    private const string fileName = "/Files/hyphen.txt";
-    public static function ReadDataFromFile(): array
+    private const string FILE_NAME = "/Files/hyphen.txt";
+    public static function readDataFromFile(): array
     {
-        $fileName = dirname(__DIR__, 1) . self::fileName;
+        $fileName = dirname(__DIR__, 1) . self::FILE_NAME;
 
         if(file_exists($fileName) && is_readable($fileName)){
             return file($fileName);
