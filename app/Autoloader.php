@@ -4,27 +4,75 @@ namespace App;
 
 class Autoloader
 {
-    protected static string $fileExtension = '.php';
-    protected static string $filePath = __DIR__;
+    protected array $prefixes = [];
 
-    public static function CustomAutoloader($className) : void
+    public function register() : void
     {
-        $className = str_replace("\\", DIRECTORY_SEPARATOR, $className);
-        $className = ltrim($className, "App\\");
-        $file = self::$filePath . DIRECTORY_SEPARATOR . $className . self::$fileExtension;
+        spl_autoload_register(array($this, 'loadClass'));
+    }
 
-        if (file_exists($file)){
-            require_once($file);
+    public function addNamespace($prefix, $baseDir, $prepend = false) : void
+    {
+        $prefix = trim($prefix, '\\') . '\\';
+
+        $baseDir = rtrim($baseDir, DIRECTORY_SEPARATOR) . '/';
+
+        if (isset($this->prefixes[$prefix]) === false) {
+            $this->prefixes[$prefix] = [];
+        }
+
+        if ($prepend) {
+            array_unshift($this->prefixes[$prefix], $baseDir);
+        } else {
+            array_push($this->prefixes[$prefix], $baseDir);
         }
     }
 
-    public static function setFileExtension(string $fileExtension) : void
+    public function loadClass($class) : bool
     {
-        self::$fileExtension = $fileExtension;
+        $prefix = $class;
+
+        while (false !== $pos = strrpos($prefix, '\\')) {
+            $prefix = substr($class, 0, $pos + 1);
+
+            $relativeClass = substr($class, $pos + 1);
+
+            $mappedFile = $this->loadMappedFile($prefix, $relativeClass);
+            if ($mappedFile){
+                return $mappedFile;
+            }
+
+            $prefix = rtrim($prefix, '\\');
+        }
+
+        return false;
     }
 
-    public static function setFilePath(string $rootPath) : void
+    protected function loadMappedFile($prefix, $relativeClass) : bool
     {
-        self::$filePath = $rootPath;
+        if (isset($this->prefixes[$prefix]) === false) {
+            return false;
+        }
+
+        foreach ($this->prefixes[$prefix] as $baseDir) {
+            $file = $baseDir
+                . str_replace('\\', '/', $relativeClass)
+                . '.php';
+
+            if ($this->requireFile($file)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function requireFile($file) : bool
+    {
+        if (file_exists($file)) {
+            require $file;
+            return true;
+        }
+        return false;
     }
 }

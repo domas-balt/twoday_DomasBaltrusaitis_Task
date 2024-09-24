@@ -36,4 +36,16 @@ class ResultVisualizationService
         $finalWord = ltrim($finalWord, "-");
         return rtrim($finalWord, "-");
     }
+
+    public function startAppLogger() : void
+    {
+        $this->logger->log(LogLevel::INFO, "<<< STARTING APP >>>");
+    }
+
+    public function endAppLogger($startTime, $endTime) : void
+    {
+        echo "The process took: " . ($endTime - $startTime) / 1000000 . "ms.\n";
+        $this->logger->log(LogLevel::INFO, "The process took: " . ($endTime - $startTime) / 1000000 . "ms.");
+        $this->logger->log(LogLevel::INFO, "<<< STOPPING APP >>>");
+    }
 }
