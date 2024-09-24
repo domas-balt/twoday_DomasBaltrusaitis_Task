@@ -2,6 +2,8 @@
 
 namespace App\Interfaces;
 
+use App\Logger\LogLevel;
+
 interface LoggerInterface
 {
     public function emergency(string $message, array $context = []);
@@ -20,5 +22,5 @@ interface LoggerInterface
 
     public function debug(string $message, array $context = []);
 
-    public function log($level, string $message, array $context = []);
+    public function log(LogLevel $level, string $message, array $context = []);
 }

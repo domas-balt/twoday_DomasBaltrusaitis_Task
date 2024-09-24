@@ -44,5 +44,5 @@ trait LoggerTrait
         $this->log(LogLevel::DEBUG, $message, $context);
     }
 
-    abstract public function log($level, string|\Stringable $message, array $context = []): void;
+    abstract public function log(LogLevel $level, string|\Stringable $message, array $context = []): void;
 }

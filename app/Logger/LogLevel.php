@@ -2,14 +2,14 @@
 
 namespace App\Logger;
 
-class LogLevel
+enum LogLevel: string
 {
-    const string EMERGENCY = 'emergency';
-    const string ALERT = 'alert';
-    const string CRITICAL = 'critical';
-    const string ERROR = 'error';
-    const string WARNING = 'warning';
-    const string NOTICE = 'notice';
-    const string INFO = 'info';
-    const string DEBUG = 'debug';
+    case EMERGENCY = 'emergency';
+    case ALERT = 'alert';
+    case CRITICAL = 'critical';
+    case ERROR = 'error';
+    case WARNING = 'warning';
+    case NOTICE = 'notice';
+    case INFO = 'info';
+    case DEBUG = 'debug';
 }

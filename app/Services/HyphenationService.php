@@ -41,8 +41,10 @@ class HyphenationService implements IHyphenationService
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllableArray);
 
         foreach ($arrayWithoutNumbers as $key => $syllable) {
-            if ($this->isFirstSyllable($syllable) &&
-                str_starts_with($this->wordToHyphenate, substr($syllable, 1))) {
+            if (
+                $this->isFirstSyllable($syllable)
+                && str_starts_with($this->wordToHyphenate, substr($syllable, 1))
+            ) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
 
@@ -205,5 +207,10 @@ class HyphenationService implements IHyphenationService
     public function getFinalWord() : string
     {
         return $this->finalProcessedWord;
+    }
+
+    public function getSelectedSyllableArray() : array
+    {
+        return $this->selectedSyllableArray;
     }
 }
