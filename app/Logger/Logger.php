@@ -5,7 +5,7 @@ namespace App\Logger;
 use App\Logger\Handler\HandlerInterface;
 use DateTimeInterface;
 
-class Logger extends AbstractLogger
+class Logger extends AbstractILogger
 {
     private $handler;
 

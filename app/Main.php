@@ -4,12 +4,14 @@ namespace App;
 
 require_once 'Autoloader.php';
 
+use App\Caching\Cache;
 use App\Logger\Handler\FileHandler;
 use App\Logger\Logger;
 use App\Logger\LogLevel;
 use App\Services\FileService;
 use App\Services\HyphenationService;
 use App\Services\ResultVisualizationService;
+use Memcached;
 
 class Main
 {
@@ -25,31 +27,44 @@ class Main
 
         $handler = new FileHandler($logFileName);
         $logger = new Logger($handler);
-        $resultVisualizationService = new ResultVisualizationService($logger);
 
-        // TURNED OFF FOR DEBUGGING
-//        echo "Enter the word you want to hyphenate:\n";
-//        $word = trim(fgets(STDIN));
-//        $word = strtolower($word);
-        $word = "generator";
+        // Pasileidi Cache su 'brew services start memcached'
+        // telnet localhost 11211
+        // profit
+        // TIKRINTI AR TOKS ZODIS JAU BUVO IVESTAS, IR NESUKT ALGORITMO JEI BUVO.
+
+        $memcached = new Memcached();
+        $memcached->addServer("localhost", 11211);
+        $cache = new Cache($memcached, $logger);
+//        $cache->set('key', 1, 80);
+//        $logger->log(LogLevel::INFO, "CACHE VEIKIA SENI >>>>>>>>>>>>>> : {$cache->get('key')}");
+
+        $resultVisualizationService = new ResultVisualizationService($logger, $cache);
+
+        echo "Enter the word you want to hyphenate:\n";
+        $word = trim(fgets(STDIN));
+        $word = strtolower($word);
 
         $resultVisualizationService->startAppLogger();
         $timerStart = hrtime(true);
 
-        $syllableArray = FileService::readDataFromFile();
+        if ($cache->has($word)) {
+            $resultVisualizationService->printString("Cached answer: " . $cache->get($word));
+        } else {
+            $syllableArray = FileService::readDataFromFile();
 
-        $hyphenationService = new HyphenationService($word, $syllableArray);
-        $hyphenationService->hyphenateWord($logger);
+            $hyphenationService = new HyphenationService($word, $syllableArray);
+            $hyphenationService->hyphenateWord();
 
-        $finalHyphenatedWord = $hyphenationService->getFinalWord();
+            $finalHyphenatedWord = $hyphenationService->getFinalWord();
 
-        $selectedSyllableArray = $hyphenationService->getSelectedSyllableArray();
+            $selectedSyllableArray = $hyphenationService->getSelectedSyllableArray();
 
-        $resultVisualizationService->logSelectedSyllables($selectedSyllableArray);
-        $resultVisualizationService->visualizeResults($finalHyphenatedWord);
+            $resultVisualizationService->logSelectedSyllables($selectedSyllableArray);
+            $resultVisualizationService->visualizeResults($finalHyphenatedWord, $word);
+        }
 
         $timerEnd = hrtime(true);
-
         $resultVisualizationService->endAppLogger($timerStart, $timerEnd);
     }
 }

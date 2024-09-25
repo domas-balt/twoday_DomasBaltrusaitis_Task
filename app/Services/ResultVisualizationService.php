@@ -2,16 +2,19 @@
 
 namespace App\Services;
 
+use App\Caching\Cache;
 use App\Logger\Logger;
 use App\Logger\LogLevel;
 
 class ResultVisualizationService
 {
     private Logger $logger;
+    private Cache $cache;
 
-    public function __construct(Logger $logger)
+    public function __construct(Logger $logger, Cache $cache)
     {
         $this->logger = $logger;
+        $this->cache = $cache;
     }
 
     public function logSelectedSyllables(array $selectedSyllableArray) : void
@@ -21,11 +24,12 @@ class ResultVisualizationService
         }
     }
 
-    public function visualizeResults(string $finalWord) : void
+    public function visualizeResults(string $finalWord, string $initialWord) : void
     {
         $finalWord = self::processFinalWord($finalWord);
         print_r("Final word:\n" . $finalWord . "\n");
 
+        $this->cache->set($initialWord, $finalWord);
         $this->logger->log(LogLevel::INFO, "Final word: {$finalWord}");
     }
 
@@ -47,5 +51,11 @@ class ResultVisualizationService
         echo "The process took: " . ($endTime - $startTime) / 1000000 . "ms.\n";
         $this->logger->log(LogLevel::INFO, "The process took: " . ($endTime - $startTime) / 1000000 . "ms.");
         $this->logger->log(LogLevel::INFO, "<<< STOPPING APP >>>");
+    }
+
+    public function printString(string $stringToPrint) : void
+    {
+        echo $stringToPrint . "\n";
+        $this->logger->log(LogLevel::INFO, $stringToPrint);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Interfaces;
 
 use App\Logger\LogLevel;
 
-interface LoggerInterface
+interface ILogger
 {
     public function emergency(string $message, array $context = []);
 
