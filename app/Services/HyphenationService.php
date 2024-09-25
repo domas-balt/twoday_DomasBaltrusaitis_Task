@@ -65,6 +65,7 @@ class HyphenationService implements IHyphenationService
 
         foreach ($this->selectedSyllableArray as $key => $value) {
             $this->patternWithNumbersArray[$key] = $this->syllableArray[$key];
+            echo $this->syllableArray[$key];
         }
     }
 
@@ -217,5 +218,20 @@ class HyphenationService implements IHyphenationService
     public function getSelectedSyllableArray() : array
     {
         return $this->selectedSyllableArray;
+    }
+
+    public function setWord(String $word) : void
+    {
+        $this->wordToHyphenate = $word;
+    }
+
+    public function clearArrays() : void
+    {
+        $this->finalProcessedWord = '';
+        $this->selectedSyllableArray = [];
+        $this->finalWordArray = [];
+        $this->doubledIndexWordArray = [];
+        $this->patternWithNumbersArray = [];
+        $this->doubledIndexPatternArray = [];
     }
 }

@@ -33,6 +33,11 @@ class ResultVisualizationService
         $this->logger->log(LogLevel::INFO, "Final word: {$finalWord}");
     }
 
+    public function getProcessedWord(string $finalWord) : string
+    {
+        return self::processFinalWord($finalWord);
+    }
+
     private function processFinalWord(string $finalWord) : string
     {
         $finalWord = str_replace(".", "", $finalWord);

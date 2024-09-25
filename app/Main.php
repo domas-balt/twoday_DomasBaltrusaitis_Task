@@ -9,6 +9,7 @@ use App\Logger\Handler\FileHandler;
 use App\Logger\Logger;
 use App\Services\FileService;
 use App\Services\HyphenationService;
+use App\Services\ParagraphHyphenationService;
 use App\Services\ResultVisualizationService;
 use Memcached;
 
@@ -23,6 +24,8 @@ class Main
         date_default_timezone_set("Europe/Vilnius");
 
         $logFileName = "app_log.txt";
+
+        $paragraphLineArray = FileService::readParagraphsFromFile();
 
         $handler = new FileHandler($logFileName);
         $logger = new Logger($handler);
@@ -44,11 +47,16 @@ class Main
         $resultVisualizationService->startAppLogger();
         $timerStart = hrtime(true);
 
+        // TODO: Perziurek sita dali. Reik padaryt dar kad grazintu didziasias raides atgal i vietas. Ir kai kurie zodziai keistai skiemenuojasi? wel-s pvz. turetu but wels, nes as primatchinu
+        // TODO: 2L1S2 pattern'a, kurio nereiktu matchint, nes zodzio gale skaicius lempa i guess.
+        $syllableArray = FileService::readDataFromFile();
+        $paragraphHyphenationService = new ParagraphHyphenationService($paragraphLineArray, $syllableArray, $resultVisualizationService);
+//        echo implode($paragraphHyphenationService->hyphenateParagraph()) . "\n";
+        // TODO
+
         if ($cache->has($word)) {
             $resultVisualizationService->printString("Cached answer: " . $cache->get($word));
         } else {
-            $syllableArray = FileService::readDataFromFile();
-
             $hyphenationService = new HyphenationService($word, $syllableArray);
             $hyphenationService->hyphenateWord();
 
