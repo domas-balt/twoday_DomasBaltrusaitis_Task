@@ -7,7 +7,6 @@ require_once 'Autoloader.php';
 use App\Caching\Cache;
 use App\Logger\Handler\FileHandler;
 use App\Logger\Logger;
-use App\Logger\LogLevel;
 use App\Services\FileService;
 use App\Services\HyphenationService;
 use App\Services\ResultVisualizationService;
@@ -28,16 +27,13 @@ class Main
         $handler = new FileHandler($logFileName);
         $logger = new Logger($handler);
 
-        // Pasileidi Cache su 'brew services start memcached'
-        // telnet localhost 11211
-        // profit
-        // TIKRINTI AR TOKS ZODIS JAU BUVO IVESTAS, IR NESUKT ALGORITMO JEI BUVO.
-
+        /*
+        'brew services start memcached'
+         telnet localhost 11211
+        */
         $memcached = new Memcached();
         $memcached->addServer("localhost", 11211);
         $cache = new Cache($memcached, $logger);
-//        $cache->set('key', 1, 80);
-//        $logger->log(LogLevel::INFO, "CACHE VEIKIA SENI >>>>>>>>>>>>>> : {$cache->get('key')}");
 
         $resultVisualizationService = new ResultVisualizationService($logger, $cache);
 

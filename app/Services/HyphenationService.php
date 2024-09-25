@@ -48,14 +48,17 @@ class HyphenationService implements IHyphenationService
                 $this->selectedSyllableArray[$key] = $syllable;
             }
 
-            if (!$this->isFirstSyllable($syllable) &&
-                !$this->isLastSyllable($syllable) &&
-                str_contains($this->wordToHyphenate, $syllable)) {
+            if (
+                !$this->isFirstSyllable($syllable)
+                && !$this->isLastSyllable($syllable)
+                && str_contains($this->wordToHyphenate, $syllable)
+            ) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
 
-            if ($this->isLastSyllable($syllable) &&
-                str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))) {
+            if ($this->isLastSyllable($syllable)
+                && str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))
+            ) {
                 $this->selectedSyllableArray[$key] = $syllable;
             }
         }
@@ -81,14 +84,16 @@ class HyphenationService implements IHyphenationService
             $patternPositions = [];
 
             while ($successfulMatchCount < count($patternWithoutNumbers)) {
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex] !==
-                    $patternWithoutNumbers[$currentIndex]) {
+                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                    !== $patternWithoutNumbers[$currentIndex]
+                ) {
                     $successfulMatchCount = 0;
                     $patternPositions = [];
                 }
 
-                if($wordCharacterArray[$comparisonBuffer + $currentIndex] ===
-                    $patternWithoutNumbers[$currentIndex]){
+                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                    === $patternWithoutNumbers[$currentIndex]
+                ) {
                     $successfulMatchCount++;
                     $patternPositions[$comparisonBuffer + $currentIndex] = $patternWithoutNumbers[$currentIndex];
                 }

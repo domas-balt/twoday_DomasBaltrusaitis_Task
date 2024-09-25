@@ -11,7 +11,7 @@ class FileService
     {
         $fileName = dirname(__DIR__, 1) . self::FILE_NAME;
 
-        if(file_exists($fileName) && is_readable($fileName)){
+        if (file_exists($fileName) && is_readable($fileName)) {
             return file($fileName);
         }
 

@@ -22,7 +22,7 @@ class FileHandler implements HandlerInterface
     function handle(array $variables): void
     {
         $output = self::DEFAULT_FORMAT;
-        foreach($variables as $variable => $value) {
+        foreach ($variables as $variable => $value) {
             $output = str_replace('%' . $variable . '%', $value, $output);
         }
         file_put_contents($this->fileName, $output . PHP_EOL, FILE_APPEND);

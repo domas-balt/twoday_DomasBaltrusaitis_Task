@@ -15,10 +15,6 @@ class Logger extends AbstractILogger
     }
     public function log(LogLevel $level, $message, array $context = []): void
     {
-//        if(!($level instanceof LogLevel)) {
-////            throw new InvalidArgumentException('Invalid log level type.');
-//        }
-
         $this->handler->handle([
             'message' => self::interpolate((string)$message, $context),
             'level' => strtoupper($level->value),
