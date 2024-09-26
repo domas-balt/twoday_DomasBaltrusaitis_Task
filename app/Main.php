@@ -10,6 +10,7 @@ use App\Logger\Logger;
 use App\Services\FileService;
 use App\Services\HyphenationService;
 use App\Services\ParagraphHyphenationService;
+use App\Services\RegexHyphenationService;
 use App\Services\ResultVisualizationService;
 use Memcached;
 
@@ -25,7 +26,7 @@ class Main
 
         $logFileName = "app_log.txt";
 
-        $paragraphLineArray = FileService::readParagraphsFromFile();
+//        $paragraphLineArray = FileService::readParagraphsFromFile();
 
         $handler = new FileHandler($logFileName);
         $logger = new Logger($handler);
@@ -40,33 +41,40 @@ class Main
 
         $resultVisualizationService = new ResultVisualizationService($logger, $cache);
 
-        echo "Enter the word you want to hyphenate:\n";
-        $word = trim(fgets(STDIN));
-        $word = strtolower($word);
+//        echo "Enter the word you want to hyphenate:\n";
+//        $word = trim(fgets(STDIN));
+//        $word = strtolower($word);
+        $word = "Mistranslate";
 
         $resultVisualizationService->startAppLogger();
         $timerStart = hrtime(true);
 
-        // TODO: Perziurek sita dali. Reik padaryt dar kad grazintu didziasias raides atgal i vietas. Ir kai kurie zodziai keistai skiemenuojasi? wel-s pvz. turetu but wels, nes as primatchinu
-        // TODO: 2L1S2 pattern'a, kurio nereiktu matchint, nes zodzio gale skaicius lempa i guess.
-        $syllableArray = FileService::readDataFromFile();
-        $paragraphHyphenationService = new ParagraphHyphenationService($paragraphLineArray, $syllableArray, $resultVisualizationService);
+        $syllableArray = FileService::readDataFromFile( "/Files/hyphen.txt");
+        $wordArray = FileService::readDataFromFile( "/Files/words.txt");
+        $regexHyphenationService = new RegexHyphenationService($syllableArray, $wordArray);
+        print_r($regexHyphenationService->hyphenateWord());
+        $hyphenationService = new HyphenationService( "", $syllableArray);
+
+//        $paragraphHyphenationService = new ParagraphHyphenationService($paragraphLineArray, $syllableArray, $resultVisualizationService);
 //        echo implode($paragraphHyphenationService->hyphenateParagraph()) . "\n";
-        // TODO
 
-        if ($cache->has($word)) {
-            $resultVisualizationService->printString("Cached answer: " . $cache->get($word));
-        } else {
-            $hyphenationService = new HyphenationService($word, $syllableArray);
-            $hyphenationService->hyphenateWord();
 
-            $finalHyphenatedWord = $hyphenationService->getFinalWord();
+//        if ($cache->has($word)) {
+//            $resultVisualizationService->printString("Cached answer: " . $cache->get($word));
+//        } else {
+//            $hyphenationService = new HyphenationService($word, $syllableArray);
+//            $hyphenationService->hyphenateWord();
+//
+//            $finalHyphenatedWord = $hyphenationService->getFinalWord();
+//
+//            $selectedSyllableArray = $hyphenationService->getSelectedSyllableArray();
+//
+//            $resultVisualizationService->logSelectedSyllables($selectedSyllableArray);
+//            $resultVisualizationService->visualizeResults($finalHyphenatedWord, $word);
+//        }
 
-            $selectedSyllableArray = $hyphenationService->getSelectedSyllableArray();
-
-            $resultVisualizationService->logSelectedSyllables($selectedSyllableArray);
-            $resultVisualizationService->visualizeResults($finalHyphenatedWord, $word);
-        }
+//        $regexHyphenationServices = new RegexHyphenationService($syllableArray, $word);
+//        $regexHyphenationServices->HyphenateWord();
 
         $timerEnd = hrtime(true);
         $resultVisualizationService->endAppLogger($timerStart, $timerEnd);

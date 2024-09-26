@@ -4,5 +4,5 @@ namespace App\Interfaces;
 
 interface IHyphenationService
 {
-    public function HyphenateWord();
+    public function hyphenateWord();
 }
