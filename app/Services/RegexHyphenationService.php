@@ -15,28 +15,28 @@ class RegexHyphenationService implements IHyphenationService
     public function hyphenateWord() : array
     {
         foreach ($this->wordsArray as $key => $word) {
-            $word = rtrim($word, "\n");
-            $word = "." . $word . ".";
-            $word = $this->regexSpreadOutCharacters($word);
-            $wordCharArray = $this->regexSplitString($word);
 
+            $wordCharArray = $this->prepareWord($word);
             foreach ($this->syllableArray as $syllable) {
-                $syllable = rtrim($syllable, "\n");
-                $syllable = $this->regexSpreadOutCharacters($syllable);
-                $syllableCharArray = $this->regexSplitString($syllable);
-
+                $syllableCharArray = $this->prepareSyllable($syllable);
                 $tempWordCharArray = $wordCharArray;
                 $matchCount = 0;
 
                 for ($i = 0; $i < count($tempWordCharArray); $i++) {
                     for ($j = 0; $j < count($syllableCharArray); $j++) {
-                        if (($i + $j) < count($tempWordCharArray) && is_numeric($tempWordCharArray[$i + $j]) && is_numeric($syllableCharArray[$j])) {
+                        if (($i + $j) < count($tempWordCharArray)
+                            && is_numeric($tempWordCharArray[$i + $j])
+                            && is_numeric($syllableCharArray[$j])
+                        ) {
                             $matchCount++;
 
                             continue;
                         }
 
-                        if (($i + $j) < count($tempWordCharArray) && $tempWordCharArray[$i + $j] == $syllableCharArray[$j]) {
+                        if (($i + $j) < count($tempWordCharArray)
+                            && $tempWordCharArray[$i + $j]
+                            == $syllableCharArray[$j]
+                        ) {
                             $matchCount++;
 
                             continue;
@@ -48,6 +48,12 @@ class RegexHyphenationService implements IHyphenationService
                     if ($matchCount == count($syllableCharArray)) {
                         $startingIndex = $i;
                         for ($i = 0; $i < count($syllableCharArray); $i++) {
+                            if (is_numeric($wordCharArray[$startingIndex + $i]) && is_numeric($syllableCharArray[$i])) {
+                                $wordCharArray[$startingIndex + $i] = max($wordCharArray[$startingIndex + $i], $syllableCharArray[$i]);
+
+                                continue;
+                            }
+
                             $wordCharArray[$startingIndex + $i] = $syllableCharArray[$i];
                         }
                         break;
@@ -75,9 +81,23 @@ class RegexHyphenationService implements IHyphenationService
     {
         $finalString = implode('', $charArray);
         $finalString = preg_replace("/[02468.]/", "", $finalString);
-        $finalString = preg_replace("/[1357](?!\.|\d|$)/", "-", $finalString);
+        $finalString = preg_replace("/[1357]/", "-", $finalString);
 
-        return $finalString;
+        return rtrim($finalString, "-");;
     }
 
+    private function prepareSyllable(string $syllable) : array
+    {
+        $syllable = rtrim($syllable, "\n");
+        $syllable = $this->regexSpreadOutCharacters($syllable);
+        return $this->regexSplitString($syllable);
+    }
+
+    private function prepareWord(string $word) : array
+    {
+        $word = rtrim($word, "\n");
+        $word = "." . $word . ".";
+        $word = $this->regexSpreadOutCharacters($word);
+        return $this->regexSplitString($word);
+    }
 }

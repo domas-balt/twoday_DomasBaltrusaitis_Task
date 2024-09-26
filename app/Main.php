@@ -26,15 +26,10 @@ class Main
 
         $logFileName = "app_log.txt";
 
-//        $paragraphLineArray = FileService::readParagraphsFromFile();
 
         $handler = new FileHandler($logFileName);
         $logger = new Logger($handler);
 
-        /*
-        'brew services start memcached'
-         telnet localhost 11211
-        */
         $memcached = new Memcached();
         $memcached->addServer("localhost", 11211);
         $cache = new Cache($memcached, $logger);
@@ -44,14 +39,18 @@ class Main
 //        echo "Enter the word you want to hyphenate:\n";
 //        $word = trim(fgets(STDIN));
 //        $word = strtolower($word);
-        $word = "Mistranslate";
+//        $word = "Mistranslate";
 
+        // TODO: Ok seni. Pirma suremontuot reik kad paragrafais siusti, padaryt kad paduot interface ir poto bus galima passint bet kuri hyphenatoriu.
+        // TODO: Suremontuok ta sena hyphenation servisa, pagal code review komentarus ir isimt puse metodu ten ciortu. Ir padaryt kad array priimt galetu.
+        // TODO: Irasyt i faila kai 20000 zodziu skiemenuosi. Ir sukurk regex emailam validatint.
+        // TODO: Pagal code review komentarus suremontuot viska kas liko.
         $resultVisualizationService->startAppLogger();
         $timerStart = hrtime(true);
 
         $syllableArray = FileService::readDataFromFile( "/Files/hyphen.txt");
         $wordArray = FileService::readDataFromFile( "/Files/words.txt");
-        $regexHyphenationService = new RegexHyphenationService($syllableArray, $wordArray);
+        $regexHyphenationService = new RegexHyphenationService($syllableArray, array_splice($wordArray, 500, 100));
         print_r($regexHyphenationService->hyphenateWord());
         $hyphenationService = new HyphenationService( "", $syllableArray);
 
