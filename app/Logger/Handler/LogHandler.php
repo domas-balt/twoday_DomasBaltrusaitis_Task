@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Logger\Handler;
 
-class FileHandler implements HandlerInterface
+class LogHandler implements HandlerInterface
 {
     private string $fileName;
     private const string LOG_FILE_PATH = "/var/";

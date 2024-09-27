@@ -8,11 +8,6 @@ class Timer
     private float $startTime;
     private float $endTime;
 
-    public function __construct()
-    {
-
-    }
-
     public function startTimer(): void
     {
         $this->startTime = hrtime(true);
@@ -25,6 +20,6 @@ class Timer
 
     public function getTimeSpent(): float
     {
-        return ($this->endTime - $this->startTime) / 1000000;
+        return ($this->endTime - $this->startTime) / 1000000000;
     }
 }

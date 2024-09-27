@@ -11,7 +11,6 @@ class ResultVisualizationService
 {
     public function __construct(
         private readonly Logger $logger,
-        private readonly Cache $cache
     ){
     }
 
@@ -22,7 +21,6 @@ class ResultVisualizationService
             $this->logger->log(LogLevel::INFO, "Hyphenated word <{$result}>");
             print_r("{$result} \n");
         }
-//        $this->cache->set($initialWord, $finalWord); //TODO: Iskelt kitur
     }
 
     public function visualizeString(string $stringToPrint): void

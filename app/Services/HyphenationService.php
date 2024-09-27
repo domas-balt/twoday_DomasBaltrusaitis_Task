@@ -31,11 +31,7 @@ class HyphenationService implements HyphenationServiceInterface
             $finalProcessedWord = $this->removeTrailingSymbols($this->finalProcessedWord);
             $serviceWordArray[$key] = $finalProcessedWord;
 
-            $this->selectedSyllableArray = [];
-            $this->finalWordArray = [];
-            $this->doubledIndexWordArray = [];
-            $this->patternWithNumbersArray = [];
-            $this->doubledIndexPatternArray = [];
+            $this->clearArrays();
         }
 
         return $serviceWordArray;
@@ -187,7 +183,7 @@ class HyphenationService implements HyphenationServiceInterface
 
     private function isFirstSyllable(string $word): bool
     {
-        if ((strpos($word, ".") === 0)) {
+        if ((str_starts_with($word, "."))) {
 
             return true;
         }
@@ -227,5 +223,14 @@ class HyphenationService implements HyphenationServiceInterface
         $finalWord = ltrim($finalWord, "-");
 
         return rtrim($finalWord, "-");
+    }
+
+    private function clearArrays(): void
+    {
+        $this->selectedSyllableArray = [];
+        $this->finalWordArray = [];
+        $this->doubledIndexWordArray = [];
+        $this->patternWithNumbersArray = [];
+        $this->doubledIndexPatternArray = [];
     }
 }
