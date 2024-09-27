@@ -9,9 +9,9 @@ use Memcached;
 
 class Cache implements CacheInterface
 {
+    private const int DEFAULT_TTL_SECONDS = 600;
     private readonly Memcached $memcached;
     private readonly Logger $logger;
-    private const int DEFAULT_TTL_SECONDS = 600;
 
     public function __construct(Memcached $memcached, Logger $logger)
     {
