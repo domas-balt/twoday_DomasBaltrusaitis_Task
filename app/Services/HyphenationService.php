@@ -1,39 +1,46 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\IHyphenationService;
+use App\Interfaces\HyphenationServiceInterface;
 
-class HyphenationService implements IHyphenationService
+class HyphenationService implements HyphenationServiceInterface
 {
 
-    private String $wordToHyphenate;
-    private array $syllableArray;
-    private array $doubledIndexWordArray;
-    private array $patternWithNumbersArray;
-    private array $doubledIndexPatternArray;
-    private array $selectedSyllableArray;
-    private array $finalWordArray;
-    private string $finalProcessedWord;
+    private String $wordToHyphenate = "";
+    private array $doubledIndexWordArray = [];
+    private array $patternWithNumbersArray = [];
+    private array $doubledIndexPatternArray = [];
+    private array $selectedSyllableArray = [];
+    private array $finalWordArray = [];
+    private string $finalProcessedWord = "";
 
-    public function __construct(String $wordToHyphenate, array $hyphenArray)
-    {
-        $this->syllableArray = $hyphenArray;
-        $this->wordToHyphenate = $wordToHyphenate;
-        $this->finalProcessedWord = '';
-        $this->selectedSyllableArray = [];
-        $this->finalWordArray = [];
-        $this->doubledIndexWordArray = [];
-        $this->patternWithNumbersArray = [];
-        $this->doubledIndexPatternArray = [];
-    }
+    public function __construct(
+        private readonly array $syllableArray
+    ){}
 
-    public function hyphenateWord() : void
+    public function hyphenateWord(array $wordsArray) : array
     {
-        self::findUsableSyllables();
-        self::findSyllablePositionsInWord();
-        self::mergeSyllablesAndWordPositionArrays();
-        self::finalProcessing();
+        $serviceWordArray = $wordsArray;
+
+        foreach ($serviceWordArray as $key => $word) {
+            $this->wordToHyphenate = $word;
+            self::findUsableSyllables();
+            self::findSyllablePositionsInWord();
+            self::mergeSyllablesAndWordPositionArrays();
+            self::addHyphensAndWhitespaces();
+            $finalProcessedWord = $this->removeTrailingSymbols($this->finalProcessedWord);
+            $serviceWordArray[$key] = $finalProcessedWord;
+
+            $this->selectedSyllableArray = [];
+            $this->finalWordArray = [];
+            $this->doubledIndexWordArray = [];
+            $this->patternWithNumbersArray = [];
+            $this->doubledIndexPatternArray = [];
+        }
+
+        return $serviceWordArray;
     }
 
     private function findUsableSyllables() : void
@@ -65,7 +72,6 @@ class HyphenationService implements IHyphenationService
 
         foreach ($this->selectedSyllableArray as $key => $value) {
             $this->patternWithNumbersArray[$key] = $this->syllableArray[$key];
-            echo $this->syllableArray[$key];
         }
     }
 
@@ -195,7 +201,7 @@ class HyphenationService implements IHyphenationService
         return false;
     }
 
-    private function finalProcessing() : void
+    private function addHyphensAndWhitespaces() : void
     {
         foreach ($this->finalWordArray as $key => $value) {
             if (is_numeric($value)) {
@@ -210,28 +216,11 @@ class HyphenationService implements IHyphenationService
         $this->finalProcessedWord = implode($this->finalWordArray);
     }
 
-    public function getFinalWord() : string
+    private function removeTrailingSymbols(string $finalWord) : string
     {
-        return $this->finalProcessedWord;
-    }
-
-    public function getSelectedSyllableArray() : array
-    {
-        return $this->selectedSyllableArray;
-    }
-
-    public function setWord(String $word) : void
-    {
-        $this->wordToHyphenate = $word;
-    }
-
-    public function clearArrays() : void
-    {
-        $this->finalProcessedWord = '';
-        $this->selectedSyllableArray = [];
-        $this->finalWordArray = [];
-        $this->doubledIndexWordArray = [];
-        $this->patternWithNumbersArray = [];
-        $this->doubledIndexPatternArray = [];
+        $finalWord = str_replace(".", "", $finalWord);
+        $finalWord = str_replace(" ", "", $finalWord);
+        $finalWord = ltrim($finalWord, "-");
+        return rtrim($finalWord, "-");
     }
 }

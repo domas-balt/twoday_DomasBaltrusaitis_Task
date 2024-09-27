@@ -1,50 +1,42 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Interfaces\HyphenationServiceInterface;
+
 class ParagraphHyphenationService
 {
-    private array $splitLine;
-    private array $paragraphLineArray;
-    private array $syllableArray;
-    private array $finalParagraphArray;
-    private readonly HyphenationService $hyphenationService;
-    private readonly ResultVisualizationService $visualizationService;
+    private array $finalParagraphArray = [];
 
-    public function __construct(array $paragraphLineArray, array $syllableArray, ResultVisualizationService $visualizationService)
-    {
-        $this->paragraphLineArray = $paragraphLineArray;
-        $this->syllableArray = $syllableArray;
-        $this->splitLine = [];
-        $this->hyphenationService = new HyphenationService("", $syllableArray);
-        $this->visualizationService = $visualizationService;
-        $this->finalParagraphArray = [];
+    public function __construct(
+        private readonly array $paragraphLineArray,
+        private readonly HyphenationServiceInterface $hyphenationService
+    ){
     }
 
     public function hyphenateParagraph(): array
     {
         foreach ($this->paragraphLineArray as $key => $paragraphLine) {
-            self::splitLineByDelimiter($paragraphLine);
-
-            for($i = 0; $i < count($this->splitLine); $i++) {
-                if ($i % 2 == 0 && !is_numeric($this->splitLine[$i])) {
-                    $this->hyphenationService->clearArrays();
-                    $this->hyphenationService->setWord(strtolower($this->splitLine[$i]));
-                    $this->hyphenationService->hyphenateWord();
-                    $hyphenatedWord = $this->hyphenationService->getFinalWord();
-                    $processedWord = $this->visualizationService->getProcessedWord($hyphenatedWord);
-                    $this->splitLine[$i] = $processedWord;
+            $splitLine = $this->splitLineByDelimiter($paragraphLine);
+            for($i = 0; $i < count($splitLine); $i++) {
+                if ($i % 2 == 0 && !is_numeric($splitLine[$i])) {
+                    $wordsToHyphenate[] = $splitLine[$i];
+                    $hyphenatedWord = $this->hyphenationService->hyphenateWord($wordsToHyphenate);
+                    $splitLine[$i] = $hyphenatedWord[array_rand($hyphenatedWord)];
                 }
+
+                $wordsToHyphenate = [];
             }
 
-            $this->finalParagraphArray[$key] = implode($this->splitLine);
+            $this->finalParagraphArray[$key] = implode($splitLine);
         }
 
         return $this->finalParagraphArray;
     }
 
-    private function splitLineByDelimiter(string $paragraphLine): void
+    private function splitLineByDelimiter(string $paragraphLine): array
     {
-        $this->splitLine = preg_split("/([\s,.!?\"'–-]+)/", $paragraphLine, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        return preg_split("/([\s,.!?\"'–-]+)/", $paragraphLine, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
     }
 }

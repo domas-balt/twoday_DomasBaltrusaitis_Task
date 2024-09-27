@@ -3,20 +3,21 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\IHyphenationService;
+use App\Interfaces\HyphenationServiceInterface;
 
-class RegexHyphenationService implements IHyphenationService
+readonly class RegexHyphenationService implements HyphenationServiceInterface
 {
     public function __construct(
-        private readonly array $syllableArray,
-        private array $wordsArray,
+        private array $syllableArray,
     ){}
 
-    public function hyphenateWord() : array
+    public function hyphenateWord(array $wordsArray): array
     {
-        foreach ($this->wordsArray as $key => $word) {
+        $serviceWordArray = $wordsArray;
 
+        foreach ($serviceWordArray as $key => $word) {
             $wordCharArray = $this->prepareWord($word);
+
             foreach ($this->syllableArray as $syllable) {
                 $syllableCharArray = $this->prepareSyllable($syllable);
                 $tempWordCharArray = $wordCharArray;
@@ -61,10 +62,9 @@ class RegexHyphenationService implements IHyphenationService
                 }
             }
             $finalWord = $this->regexFinalProcessing($wordCharArray);
-            print($finalWord . "\n");
-            $this->wordsArray[$key] = $finalWord;
+            $serviceWordArray[$key] = $finalWord;
         }
-        return $this->wordsArray;
+        return $serviceWordArray;
     }
 
     private function regexSpreadOutCharacters(string $wordToSpreadOut) : string
@@ -90,6 +90,7 @@ class RegexHyphenationService implements IHyphenationService
     {
         $syllable = rtrim($syllable, "\n");
         $syllable = $this->regexSpreadOutCharacters($syllable);
+
         return $this->regexSplitString($syllable);
     }
 
@@ -98,6 +99,7 @@ class RegexHyphenationService implements IHyphenationService
         $word = rtrim($word, "\n");
         $word = "." . $word . ".";
         $word = $this->regexSpreadOutCharacters($word);
+
         return $this->regexSplitString($word);
     }
 }

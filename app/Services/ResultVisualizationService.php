@@ -24,13 +24,20 @@ class ResultVisualizationService
         }
     }
 
-    public function visualizeResults(string $finalWord, string $initialWord) : void
+    public function visualizeResults(array $hyphenatedResults, string $infoString) : void
     {
-        $finalWord = self::processFinalWord($finalWord);
-        print_r("Final word:\n" . $finalWord . "\n");
+        print($infoString);
+        foreach ($hyphenatedResults as $result) {
+            $this->logger->log(LogLevel::INFO, "Hyphenated word <{$result}>");
+            print_r("{$result} \n");
+        }
+//        $this->cache->set($initialWord, $finalWord); //TODO: Iskelt kitur
+    }
 
-        $this->cache->set($initialWord, $finalWord);
-        $this->logger->log(LogLevel::INFO, "Final word: {$finalWord}");
+    public function visualizeString(string $stringToPrint) : void
+    {
+        echo $stringToPrint . "\n";
+        $this->logger->log(LogLevel::INFO, $stringToPrint);
     }
 
     public function getProcessedWord(string $finalWord) : string
@@ -38,29 +45,13 @@ class ResultVisualizationService
         return self::processFinalWord($finalWord);
     }
 
-    private function processFinalWord(string $finalWord) : string
-    {
-        $finalWord = str_replace(".", "", $finalWord);
-        $finalWord = str_replace(" ", "", $finalWord);
-        $finalWord = ltrim($finalWord, "-");
-        return rtrim($finalWord, "-");
-    }
-
     public function startAppLogger() : void
     {
         $this->logger->log(LogLevel::INFO, "<<< STARTING APP >>>");
     }
 
-    public function endAppLogger($startTime, $endTime) : void
+    public function endAppLogger() : void
     {
-        echo "The process took: " . ($endTime - $startTime) / 1000000 . "ms.\n";
-        $this->logger->log(LogLevel::INFO, "The process took: " . ($endTime - $startTime) / 1000000 . "ms.");
         $this->logger->log(LogLevel::INFO, "<<< STOPPING APP >>>");
-    }
-
-    public function printString(string $stringToPrint) : void
-    {
-        echo $stringToPrint . "\n";
-        $this->logger->log(LogLevel::INFO, $stringToPrint);
     }
 }
