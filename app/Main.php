@@ -12,7 +12,6 @@ use App\Services\HyphenationService;
 use App\Services\ParagraphHyphenationService;
 use App\Services\RegexHyphenationService;
 use App\Services\ResultVisualizationService;
-use App\Services\UserInputService;
 use App\Utilities\Timer;
 
 class Main
