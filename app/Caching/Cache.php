@@ -2,13 +2,12 @@
 
 namespace App\Caching;
 
-use App\Interfaces\ICache;
 use App\Logger\Logger;
 use App\Logger\LogLevel;
 use http\Exception\InvalidArgumentException;
 use Memcached;
 
-class Cache implements ICache
+class Cache implements CacheInterface
 {
     private readonly Memcached $memcached;
     private readonly Logger $logger;

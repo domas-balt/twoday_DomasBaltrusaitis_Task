@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Interfaces\HyphenationServiceInterface;
-
 class HyphenationService implements HyphenationServiceInterface
 {
 
-    private String $wordToHyphenate = "";
+    private string $wordToHyphenate = "";
     private array $doubledIndexWordArray = [];
     private array $patternWithNumbersArray = [];
     private array $doubledIndexPatternArray = [];
@@ -18,18 +16,19 @@ class HyphenationService implements HyphenationServiceInterface
 
     public function __construct(
         private readonly array $syllableArray
-    ){}
+    ){
+    }
 
-    public function hyphenateWord(array $wordsArray) : array
+    public function hyphenateWord(array $wordsArray): array
     {
         $serviceWordArray = $wordsArray;
 
         foreach ($serviceWordArray as $key => $word) {
             $this->wordToHyphenate = $word;
-            self::findUsableSyllables();
-            self::findSyllablePositionsInWord();
-            self::mergeSyllablesAndWordPositionArrays();
-            self::addHyphensAndWhitespaces();
+            $this->findUsableSyllables();
+            $this->findSyllablePositionsInWord();
+            $this->mergeSyllablesAndWordPositionArrays();
+            $this->addHyphensAndWhitespaces();
             $finalProcessedWord = $this->removeTrailingSymbols($this->finalProcessedWord);
             $serviceWordArray[$key] = $finalProcessedWord;
 
@@ -43,7 +42,7 @@ class HyphenationService implements HyphenationServiceInterface
         return $serviceWordArray;
     }
 
-    private function findUsableSyllables() : void
+    private function findUsableSyllables(): void
     {
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllableArray);
 
@@ -75,7 +74,7 @@ class HyphenationService implements HyphenationServiceInterface
         }
     }
 
-    private function findSyllablePositionsInWord() : void
+    private function findSyllablePositionsInWord(): void
     {
         $this->wordToHyphenate = "." . $this->wordToHyphenate . ".";
         $wordCharacterArray = str_split($this->wordToHyphenate);
@@ -113,14 +112,15 @@ class HyphenationService implements HyphenationServiceInterface
                 }
 
                 if ($successfulMatchCount === count($patternWithoutNumbers)) {
-                    self::buildWordWithNumbers($patternPositions, $fullPatternChars);
+                    $this->buildWordWithNumbers($patternPositions, $fullPatternChars);
+
                     break;
                 }
             }
         }
     }
 
-    private function mergeSyllablesAndWordPositionArrays() : void
+    private function mergeSyllablesAndWordPositionArrays(): void
     {
         ksort($this->finalWordArray);
         ksort($this->doubledIndexWordArray);
@@ -136,7 +136,7 @@ class HyphenationService implements HyphenationServiceInterface
         ksort($this->finalWordArray);
     }
 
-    private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern) : void
+    private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern): void
     {
         $this->doubledIndexPatternArray = [];
 
@@ -150,6 +150,7 @@ class HyphenationService implements HyphenationServiceInterface
         for ($i = 0; $i < count($fullPattern); $i++) {
             if (is_numeric($fullPattern[$i])) {
                 $this->doubledIndexPatternArray[$iterationDoubleKey - 1] = $fullPattern[$i];
+
                 continue;
             }
 
@@ -171,37 +172,41 @@ class HyphenationService implements HyphenationServiceInterface
         }
     }
 
-    private function filterOutNumbersFromArray($arrayToFilter) : array
+    private function filterOutNumbersFromArray($arrayToFilter): array
     {
         foreach ($arrayToFilter as $key => $wordToFilter){
-            $arrayToFilter[$key] = self::removeNumbersFromString($wordToFilter);
+            $arrayToFilter[$key] = $this->removeNumbersFromString($wordToFilter);
         }
 
         return $arrayToFilter;
     }
 
-    private function removeNumbersFromString(String $word) : String
+    private function removeNumbersFromString(string $word): string
     {
         return preg_replace("/[^a-zA-Z.]/", "", $word);
     }
 
-    private function isFirstSyllable(String $word) : bool
+    private function isFirstSyllable(string $word): bool
     {
         if ((strpos($word, ".") === 0)) {
+
             return true;
         }
+
         return false;
     }
 
-    private function isLastSyllable(String $word) : bool
+    private function isLastSyllable(string $word): bool
     {
         if (str_ends_with($word, ".")) {
+
             return true;
         }
+
         return false;
     }
 
-    private function addHyphensAndWhitespaces() : void
+    private function addHyphensAndWhitespaces(): void
     {
         foreach ($this->finalWordArray as $key => $value) {
             if (is_numeric($value)) {
@@ -216,11 +221,12 @@ class HyphenationService implements HyphenationServiceInterface
         $this->finalProcessedWord = implode($this->finalWordArray);
     }
 
-    private function removeTrailingSymbols(string $finalWord) : string
+    private function removeTrailingSymbols(string $finalWord): string
     {
         $finalWord = str_replace(".", "", $finalWord);
         $finalWord = str_replace(" ", "", $finalWord);
         $finalWord = ltrim($finalWord, "-");
+
         return rtrim($finalWord, "-");
     }
 }

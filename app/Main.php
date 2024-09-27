@@ -40,14 +40,14 @@ class Main
 
         $word = UserInputService::readWordToHyphenated();
 
-        $resultVisualizationService->startAppLogger();
+        $logger->logStartOfApp();
 
         $timer = new Timer();
         $timer->startTimer();
 
-        $syllableArray = FileService::readDataFromFile( '/Files/hyphen.txt');
-        $wordArray = FileService::readDataFromFile( '/Files/words.txt');
-        $paragraphArray = FileService::readDataFromFile( '/Files/paragraph.txt');
+        $syllableArray = FileService::readDataFromFile( '/var/hyphen.txt');
+        $wordArray = FileService::readDataFromFile( '/var/words.txt');
+        $paragraphArray = FileService::readDataFromFile( '/var/paragraph.txt');
 
 
         $regexHyphenationService = new RegexHyphenationService($syllableArray);
@@ -62,20 +62,20 @@ class Main
 
         $resultVisualizationService->visualizeResults($finalParagraphArray,
             "Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
-        FileService::printDataToFile('/Files/nonRegexParagraph.txt', $finalParagraphArray);
+        FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphArray);
 
         $ParagraphRegexHyphenationService = new ParagraphHyphenationService($paragraphArray, $regexHyphenationService);
         $finalRegexParagraphArray = $ParagraphRegexHyphenationService->hyphenateParagraph();
 
         $resultVisualizationService->visualizeResults($finalRegexParagraphArray,
             "Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
-        FileService::printDataToFile('/Files/regexParagraph.txt', $finalParagraphArray);
+        FileService::printDataToFile('/var/regexParagraph.txt', $finalParagraphArray);
 
         $timer->endTimer();
         $timeSpent = $timer->getTimeSpent();
 
         $resultVisualizationService->VisualizeString("Time spent {$timeSpent} milliseconds\n");
-        $resultVisualizationService->endAppLogger();
+        $logger->logEndOfApp();
     }
 }
 
