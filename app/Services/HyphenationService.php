@@ -5,7 +5,6 @@ namespace App\Services;
 
 class HyphenationService implements HyphenationServiceInterface
 {
-
     private string $wordToHyphenate = "";
     private array $doubledIndexWordArray = [];
     private array $patternWithNumbersArray = [];

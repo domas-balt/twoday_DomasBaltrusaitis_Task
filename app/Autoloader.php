@@ -7,15 +7,14 @@ class Autoloader
 {
     protected array $prefixes = [];
 
-    public function register() : void
+    public function register(): void
     {
         spl_autoload_register(array($this, 'loadClass'));
     }
 
-    public function addNamespace($prefix, $baseDir, $prepend = false) : void
+    public function addNamespace($prefix, $baseDir, $prepend = false): void
     {
         $prefix = trim($prefix, '\\') . '\\';
-
         $baseDir = rtrim($baseDir, DIRECTORY_SEPARATOR) . '/';
 
         if (isset($this->prefixes[$prefix]) === false) {
@@ -29,29 +28,32 @@ class Autoloader
         }
     }
 
-    public function loadClass($class) : bool
+    public function loadClass($class): bool
     {
         $prefix = $class;
 
-        while (false !== $pos = strrpos($prefix, '\\')) {
+        do {
+            $pos = strrpos($prefix, '\\');
             $prefix = substr($class, 0, $pos + 1);
 
             $relativeClass = substr($class, $pos + 1);
 
             $mappedFile = $this->loadMappedFile($prefix, $relativeClass);
             if ($mappedFile){
+
                 return $mappedFile;
             }
 
             $prefix = rtrim($prefix, '\\');
-        }
+        } while (strrpos($prefix, '\\') !== false);
 
         return false;
     }
 
-    protected function loadMappedFile($prefix, $relativeClass) : bool
+    protected function loadMappedFile($prefix, $relativeClass): bool
     {
         if (isset($this->prefixes[$prefix]) === false) {
+
             return false;
         }
 
@@ -61,6 +63,7 @@ class Autoloader
                 . '.php';
 
             if ($this->requireFile($file)) {
+
                 return true;
             }
         }
@@ -68,12 +71,13 @@ class Autoloader
         return false;
     }
 
-    protected function requireFile($file) : bool
+    protected function requireFile($file): bool
     {
         if (file_exists($file)) {
             require $file;
             return true;
         }
+
         return false;
     }
 }

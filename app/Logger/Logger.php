@@ -14,6 +14,7 @@ class Logger extends AbstractLogger
     {
         $this->handler = $handler;
     }
+
     public function log(LogLevel $level, $message, array $context = []): void
     {
         $this->handler->handle([

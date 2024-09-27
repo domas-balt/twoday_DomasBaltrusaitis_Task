@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Logger\Handler;
 
 class FileHandler implements HandlerInterface
 {
     private string $fileName;
-    private const string LOG_FILE_PATH = "/Files/";
+    private const string LOG_FILE_PATH = "/var/";
 
     public function __construct(string $fileName)
     {

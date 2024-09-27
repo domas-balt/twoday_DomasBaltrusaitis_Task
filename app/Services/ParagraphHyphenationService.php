@@ -9,7 +9,7 @@ class ParagraphHyphenationService
 
     public function __construct(
         private readonly array $paragraphLineArray,
-        private readonly HyphenationServiceInterface $hyphenationService
+        private readonly HyphenationServiceInterface $hyphenationService,
     ){
     }
 
