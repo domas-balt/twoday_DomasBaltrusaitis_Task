@@ -7,36 +7,39 @@ namespace App\Services;
 readonly class RegexHyphenationService implements HyphenationServiceInterface
 {
     public function __construct(
-        private array $syllableArray,
+        private array $syllables,
     ){
     }
 
     public function hyphenateWords(array $words): array
     {
-        $serviceWordArray = $words;
+        $serviceWords = $words;
 
-        foreach ($serviceWordArray as $key => $word) {
-            $wordCharArray = $this->prepareWord($word);
+        foreach ($serviceWords as $key => $word) {
+            $wordChars = $this->prepareWord($word);
 
-            foreach ($this->syllableArray as $syllable) {
-                $syllableCharArray = $this->prepareSyllable($syllable);
-                $tempWordCharArray = $wordCharArray;
+            foreach ($this->syllables as $syllable) {
+                $syllableChars = $this->prepareSyllable($syllable);
+                $tempWordChars = $wordChars;
                 $matchCount = 0;
 
-                for ($i = 0; $i < count($tempWordCharArray); $i++) {
-                    for ($j = 0; $j < count($syllableCharArray); $j++) {
-                        if (($i + $j) < count($tempWordCharArray)
-                            && is_numeric($tempWordCharArray[$i + $j])
-                            && is_numeric($syllableCharArray[$j])
+                for ($i = 0; $i < count($tempWordChars); $i++) {
+                    for ($j = 0; $j < count($syllableChars); $j++) {
+                        $addedIndices = $i + $j;
+
+                        if (
+                            $addedIndices < count($tempWordChars)
+                            && is_numeric($tempWordChars[$addedIndices])
+                            && is_numeric($syllableChars[$j])
                         ) {
                             $matchCount++;
 
                             continue;
                         }
 
-                        if (($i + $j) < count($tempWordCharArray)
-                            && $tempWordCharArray[$i + $j]
-                            == $syllableCharArray[$j]
+                        if (
+                            $addedIndices < count($tempWordChars)
+                            && $tempWordChars[$addedIndices] === $syllableChars[$j]
                         ) {
                             $matchCount++;
 
@@ -46,27 +49,27 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
                         $matchCount = 0;
                     }
 
-                    if ($matchCount == count($syllableCharArray)) {
+                    if ($matchCount == count($syllableChars)) {
                         $startingIndex = $i;
-                        for ($i = 0; $i < count($syllableCharArray); $i++) {
-                            if (is_numeric($wordCharArray[$startingIndex + $i]) && is_numeric($syllableCharArray[$i])) {
-                                $wordCharArray[$startingIndex + $i] = max($wordCharArray[$startingIndex + $i], $syllableCharArray[$i]);
+                        for ($i = 0; $i < count($syllableChars); $i++) {
+                            if (is_numeric($wordChars[$startingIndex + $i]) && is_numeric($syllableChars[$i])) {
+                                $wordChars[$startingIndex + $i] = max($wordChars[$startingIndex + $i], $syllableChars[$i]);
 
                                 continue;
                             }
 
-                            $wordCharArray[$startingIndex + $i] = $syllableCharArray[$i];
+                            $wordChars[$startingIndex + $i] = $syllableChars[$i];
                         }
 
                         break;
                     }
                 }
             }
-            $finalWord = $this->regexFinalProcessing($wordCharArray);
-            $serviceWordArray[$key] = $finalWord;
+            $finalWord = $this->regexFinalProcessing($wordChars);
+            $serviceWords[$key] = $finalWord;
         }
 
-        return $serviceWordArray;
+        return $serviceWords;
     }
 
     private function regexSpreadOutCharacters(string $wordToSpreadOut): string
@@ -79,9 +82,9 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
         return preg_split('//', $stringToSplit,-1, PREG_SPLIT_NO_EMPTY);
     }
 
-    private function regexFinalProcessing(array $charArray): string
+    private function regexFinalProcessing(array $chars): string
     {
-        $finalString = implode('', $charArray);
+        $finalString = implode('', $chars);
         $finalString = preg_replace('/[02468.]/', '', $finalString);
         $finalString = preg_replace('/[1357]/', '-', $finalString);
 

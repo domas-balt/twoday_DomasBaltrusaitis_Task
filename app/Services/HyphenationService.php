@@ -11,7 +11,7 @@ class HyphenationService implements HyphenationServiceInterface
     private array $finalWords = [];
 
     public function __construct(
-        private readonly array $syllableArray
+        private readonly array $syllables
     ){
     }
 
@@ -33,7 +33,7 @@ class HyphenationService implements HyphenationServiceInterface
 
     private function findUsableSyllables(string $word): array
     {
-        $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllableArray);
+        $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllables);
         $patternsWithNumbers = [];
 
         foreach ($arrayWithoutNumbers as $key => $syllable) {
@@ -60,7 +60,7 @@ class HyphenationService implements HyphenationServiceInterface
         }
 
         foreach ($this->selectedSyllables as $key => $value) {
-            $patternsWithNumbers[$key] = $this->syllableArray[$key];
+            $patternsWithNumbers[$key] = $this->syllables[$key];
         }
 
         return $patternsWithNumbers;
@@ -68,8 +68,8 @@ class HyphenationService implements HyphenationServiceInterface
 
     private function findSyllablePositionsInWord(string $word, array $patternsWithNumbers): string
     {
-        $word = "." . $word . ".";
-        $wordCharacterArray = str_split($word);
+        $word = ".{$word}.";
+        $wordChars = str_split($word);
 
         foreach ($this->selectedSyllables as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->removeNumbersFromString($pattern));
@@ -82,14 +82,14 @@ class HyphenationService implements HyphenationServiceInterface
             $patternPositions = [];
 
             while ($successfulMatchCount < count($patternWithoutNumbers)) {
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                if ($wordChars[$comparisonBuffer + $currentIndex]
                     !== $patternWithoutNumbers[$currentIndex]
                 ) {
                     $successfulMatchCount = 0;
                     $patternPositions = [];
                 }
 
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                if ($wordChars[$comparisonBuffer + $currentIndex]
                     === $patternWithoutNumbers[$currentIndex]
                 ) {
                     $successfulMatchCount++;
@@ -120,30 +120,30 @@ class HyphenationService implements HyphenationServiceInterface
         ksort($this->doubledIndexWords);
         
         $wordToHyphenateSplit = str_split($word);
-        $wordToHyphenateExpandedArray = [];
+        $wordToHyphenateExpandedIndices = [];
 
         foreach ($wordToHyphenateSplit as $key => $wordToHyphenateChar) {
-            $wordToHyphenateExpandedArray[$key * 2] = $wordToHyphenateChar;
+            $wordToHyphenateExpandedIndices[$key * 2] = $wordToHyphenateChar;
         }
 
-        $this->finalWords = $this->finalWords + $wordToHyphenateExpandedArray;
+        $this->finalWords = $this->finalWords + $wordToHyphenateExpandedIndices;
         ksort($this->finalWords);
     }
 
     private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern): void
     {
-        $doubledIndexPatternArray = [];
+        $patternDoubledIndices = [];
 
         foreach ($patternWithCharPositions as $key => $patternCharNoNumber) {
-            $doubledIndexPatternArray[$key * 2] = $patternCharNoNumber;
+            $patternDoubledIndices[$key * 2] = $patternCharNoNumber;
             $this->doubledIndexWords[$key * 2] = $patternCharNoNumber;
         }
 
-        $iterationDoubleKey = array_key_first($doubledIndexPatternArray);
+        $iterationDoubleKey = array_key_first($patternDoubledIndices);
 
         for ($i = 0; $i < count($fullPattern); $i++) {
             if (is_numeric($fullPattern[$i])) {
-                $doubledIndexPatternArray[$iterationDoubleKey - 1] = $fullPattern[$i];
+                $patternDoubledIndices[$iterationDoubleKey - 1] = $fullPattern[$i];
 
                 continue;
             }
@@ -151,9 +151,9 @@ class HyphenationService implements HyphenationServiceInterface
             $iterationDoubleKey = $iterationDoubleKey + 2;
         }
 
-        ksort($doubledIndexPatternArray);
+        ksort($patternDoubledIndices);
 
-        foreach ($doubledIndexPatternArray as $key => $value) {
+        foreach ($patternDoubledIndices as $key => $value) {
             if (!isset($this->finalWords[$key])){
                 $this->finalWords[$key] = $value;
             }
@@ -182,22 +182,12 @@ class HyphenationService implements HyphenationServiceInterface
 
     private function isFirstSyllable(string $word): bool
     {
-        if ((str_starts_with($word, "."))) {
-
-            return true;
-        }
-
-        return false;
+        return str_starts_with($word, '.');
     }
 
     private function isLastSyllable(string $word): bool
     {
-        if (str_ends_with($word, ".")) {
-
-            return true;
-        }
-
-        return false;
+        return str_ends_with($word, '.');
     }
 
     private function addHyphensAndWhitespaces(): string
@@ -217,11 +207,11 @@ class HyphenationService implements HyphenationServiceInterface
 
     private function removeTrailingSymbols(string $finalWord): string
     {
-        $finalWord = str_replace(".", "", $finalWord);
-        $finalWord = str_replace(" ", "", $finalWord);
-        $finalWord = ltrim($finalWord, "-");
+        $finalWord = str_replace('.', '', $finalWord);
+        $finalWord = str_replace(' ', '', $finalWord);
+        $finalWord = ltrim($finalWord, '-');
 
-        return rtrim($finalWord, "-");
+        return rtrim($finalWord, '-');
     }
 
     private function clearArrays(): void

@@ -31,17 +31,17 @@ class Main
 
         $logFileName = '/var/app_log.txt';
 
-        $syllableArray = FileService::readDataFromFile( '/var/hyphen.txt');
-        $wordArray = FileService::readDataFromFile($argv[1]);
+        $syllables = FileService::readDataFromFile( '/var/hyphen.txt');
+        $words = FileService::readDataFromFile($argv[1]);
 
         $timer = new Timer();
         $handler = new LogHandler($logFileName);
         $logger = new Logger($handler);
         $resultVisualizationService = new ResultVisualizationService($logger);
-        $regexHyphenationService = new RegexHyphenationService($syllableArray);
-        $hyphenationService = new HyphenationService($syllableArray);
-        $paragraphHyphenationService = new ParagraphHyphenationService($wordArray, $hyphenationService);
-        $paragraphRegexHyphenationService = new ParagraphHyphenationService($wordArray, $regexHyphenationService);
+        $regexHyphenationService = new RegexHyphenationService($syllables);
+        $hyphenationService = new HyphenationService($syllables);
+        $paragraphHyphenationService = new ParagraphHyphenationService($words, $hyphenationService);
+        $paragraphRegexHyphenationService = new ParagraphHyphenationService($words, $regexHyphenationService);
 
         $logger->logStartOfApp();
 
@@ -68,8 +68,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    '',
-    '/var/paragraph.txt'
-]);
+$app->run($argv);
