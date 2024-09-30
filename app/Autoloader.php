@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App;
@@ -40,7 +41,6 @@ class Autoloader
 
             $mappedFile = $this->loadMappedFile($prefix, $relativeClass);
             if ($mappedFile){
-
                 return $mappedFile;
             }
 

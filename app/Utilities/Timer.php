@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Utilities;
@@ -10,16 +11,16 @@ class Timer
 
     public function startTimer(): void
     {
-        $this->startTime = hrtime(true);
+        $this->startTime = microtime(true);
     }
 
     public function endTimer(): void
     {
-        $this->endTime = hrtime(true);
+        $this->endTime = microtime(true);
     }
 
-    public function getTimeSpent(): float
+    public function getTimeSpent(): string
     {
-        return ($this->endTime - $this->startTime) / 1000000000;
+        return number_format(($this->endTime - $this->startTime), 2, '.', '');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -9,10 +10,9 @@ class FileService
 {
     public static function readDataFromFile(string $fileName): array
     {
-        $fullPath = dirname(__DIR__) . $fileName;
+        $fullPath = self::getFullPath($fileName);
 
         if (file_exists($fullPath) && is_readable($fullPath)) {
-
             return file($fullPath);
         }
 
@@ -21,7 +21,12 @@ class FileService
 
     public static function printDataToFile(string $fileName, array $content): void
     {
-        $fullPath = dirname(__DIR__) . $fileName;
+        $fullPath = self::getFullPath($fileName);
         file_put_contents($fullPath, $content);
+    }
+
+    private static function getFullPath($fileName): string
+    {
+        return dirname(__DIR__) . $fileName;
     }
 }

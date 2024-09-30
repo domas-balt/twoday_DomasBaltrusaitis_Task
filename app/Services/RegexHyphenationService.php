@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -10,9 +11,9 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
     ){
     }
 
-    public function hyphenateWord(array $wordsArray): array
+    public function hyphenateWords(array $words): array
     {
-        $serviceWordArray = $wordsArray;
+        $serviceWordArray = $words;
 
         foreach ($serviceWordArray as $key => $word) {
             $wordCharArray = $this->prepareWord($word);
@@ -81,15 +82,15 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
     private function regexFinalProcessing(array $charArray): string
     {
         $finalString = implode('', $charArray);
-        $finalString = preg_replace("/[02468.]/", "", $finalString);
-        $finalString = preg_replace("/[1357]/", "-", $finalString);
+        $finalString = preg_replace('/[02468.]/', '', $finalString);
+        $finalString = preg_replace('/[1357]/', '-', $finalString);
 
-        return rtrim($finalString, "-");;
+        return rtrim($finalString, '-');
     }
 
     private function prepareSyllable(string $syllable): array
     {
-        $syllable = rtrim($syllable, "\n");
+        $syllable = trim($syllable, PHP_EOL);
         $syllable = $this->regexSpreadOutCharacters($syllable);
 
         return $this->regexSplitString($syllable);
@@ -97,9 +98,8 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
 
     private function prepareWord(string $word): array
     {
-        $word = rtrim($word, "\n");
-        $word = "." . $word . ".";
-        $word = $this->regexSpreadOutCharacters($word);
+        $word = trim($word, PHP_EOL);
+        $word = $this->regexSpreadOutCharacters(".{$word}.");
 
         return $this->regexSplitString($word);
     }

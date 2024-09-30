@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Logger\Handler;
@@ -6,11 +7,10 @@ namespace App\Logger\Handler;
 class LogHandler implements HandlerInterface
 {
     private string $fileName;
-    private const string LOG_FILE_PATH = "/var/";
 
-    public function __construct(string $fileName)
+    public function __construct(string $logFilePath)
     {
-        $directoryFile = dirname(__DIR__, 2) . self::LOG_FILE_PATH . $fileName;
+        $directoryFile = dirname(__DIR__, 2) . $logFilePath;
 
         if (!file_exists($directoryFile)) {
             $openFile = fopen($directoryFile, "w");
