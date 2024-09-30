@@ -6,6 +6,7 @@ namespace App;
 
 require_once 'Autoloader.php';
 
+use App\Database\DBConnection;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
 use App\Services\FileService;
@@ -33,6 +34,8 @@ class Main
 
         $syllables = FileService::readDataFromFile( '/var/hyphen.txt');
         $words = FileService::readDataFromFile($argv[1]);
+
+        DBConnection::tryConnect();
 
         $timer = new Timer();
         $handler = new LogHandler($logFileName);
@@ -68,4 +71,8 @@ class Main
 }
 
 $app = new Main();
-$app->run($argv);
+//$app->run($argv);
+$app->run([
+    '',
+    '/var/paragraph.txt'
+]);
