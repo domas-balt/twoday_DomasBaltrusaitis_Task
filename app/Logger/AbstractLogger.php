@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Logger;
 
-trait LoggerTrait
+abstract class AbstractLogger implements LoggerInterface
 {
     public function emergency(string|\Stringable $message, array $context = []) : void
     {

@@ -1,81 +1,79 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Interfaces\IHyphenationService;
-
-class HyphenationService implements IHyphenationService
+class HyphenationService implements HyphenationServiceInterface
 {
+    private array $doubledIndexWords = [];
+    private array $selectedSyllables = [];
+    private array $finalWords = [];
 
-    private String $wordToHyphenate;
-    private array $syllableArray;
-    private array $doubledIndexWordArray;
-    private array $patternWithNumbersArray;
-    private array $doubledIndexPatternArray;
-    private array $selectedSyllableArray;
-    private array $finalWordArray;
-    private string $finalProcessedWord;
-
-    public function __construct(String $wordToHyphenate, array $hyphenArray)
-    {
-        $this->syllableArray = $hyphenArray;
-        $this->wordToHyphenate = $wordToHyphenate;
-        $this->finalProcessedWord = '';
-        $this->selectedSyllableArray = [];
-        $this->finalWordArray = [];
-        $this->doubledIndexWordArray = [];
-        $this->patternWithNumbersArray = [];
-        $this->doubledIndexPatternArray = [];
+    public function __construct(
+        private readonly array $syllables
+    ){
     }
 
-    public function hyphenateWord() : void
+    public function hyphenateWords(array $words): array
     {
-        self::findUsableSyllables();
-        self::findSyllablePositionsInWord();
-        self::mergeSyllablesAndWordPositionArrays();
-        self::finalProcessing();
+        foreach ($words as $key => $word) {
+            $patternsWithNumbers = $this->findUsableSyllables($word);
+            $word = $this->findSyllablePositionsInWord($word, $patternsWithNumbers);
+            $this->mergeSyllablesAndWordPositionArrays($word);
+            $finalProcessedWord = $this->addHyphensAndWhitespaces();
+
+            $words[$key] = $this->removeTrailingSymbols($finalProcessedWord);
+
+            $this->clearArrays();
+        }
+
+        return $words;
     }
 
-    private function findUsableSyllables() : void
+    private function findUsableSyllables(string $word): array
     {
-        $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllableArray);
+        $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllables);
+        $patternsWithNumbers = [];
 
         foreach ($arrayWithoutNumbers as $key => $syllable) {
             if (
                 $this->isFirstSyllable($syllable)
-                && str_starts_with($this->wordToHyphenate, substr($syllable, 1))
+                && str_starts_with($word, substr($syllable, 1))
             ) {
-                $this->selectedSyllableArray[$key] = $syllable;
+                $this->selectedSyllables[$key] = $syllable;
             }
 
             if (
                 !$this->isFirstSyllable($syllable)
                 && !$this->isLastSyllable($syllable)
-                && str_contains($this->wordToHyphenate, $syllable)
+                && str_contains($word, $syllable)
             ) {
-                $this->selectedSyllableArray[$key] = $syllable;
+                $this->selectedSyllables[$key] = $syllable;
             }
 
             if ($this->isLastSyllable($syllable)
-                && str_ends_with($this->wordToHyphenate, substr($syllable, 0, -1))
+                && str_ends_with($word, substr($syllable, 0, -1))
             ) {
-                $this->selectedSyllableArray[$key] = $syllable;
+                $this->selectedSyllables[$key] = $syllable;
             }
         }
 
-        foreach ($this->selectedSyllableArray as $key => $value) {
-            $this->patternWithNumbersArray[$key] = $this->syllableArray[$key];
+        foreach ($this->selectedSyllables as $key => $value) {
+            $patternsWithNumbers[$key] = $this->syllables[$key];
         }
+
+        return $patternsWithNumbers;
     }
 
-    private function findSyllablePositionsInWord() : void
+    private function findSyllablePositionsInWord(string $word, array $patternsWithNumbers): string
     {
-        $this->wordToHyphenate = "." . $this->wordToHyphenate . ".";
-        $wordCharacterArray = str_split($this->wordToHyphenate);
+        $word = ".{$word}.";
+        $wordChars = str_split($word);
 
-        foreach ($this->selectedSyllableArray as $key => $pattern) {
+        foreach ($this->selectedSyllables as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->removeNumbersFromString($pattern));
-            $fullPatternChars = str_split(str_replace("\n","",$this->patternWithNumbersArray[$key]));
+            $fullPatternChars = str_split(str_replace("\n","",$patternsWithNumbers[$key]));
 
             $successfulMatchCount = 0;
             $comparisonBuffer = 0;
@@ -84,14 +82,14 @@ class HyphenationService implements IHyphenationService
             $patternPositions = [];
 
             while ($successfulMatchCount < count($patternWithoutNumbers)) {
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                if ($wordChars[$comparisonBuffer + $currentIndex]
                     !== $patternWithoutNumbers[$currentIndex]
                 ) {
                     $successfulMatchCount = 0;
                     $patternPositions = [];
                 }
 
-                if ($wordCharacterArray[$comparisonBuffer + $currentIndex]
+                if ($wordChars[$comparisonBuffer + $currentIndex]
                     === $patternWithoutNumbers[$currentIndex]
                 ) {
                     $successfulMatchCount++;
@@ -106,116 +104,120 @@ class HyphenationService implements IHyphenationService
                 }
 
                 if ($successfulMatchCount === count($patternWithoutNumbers)) {
-                    self::buildWordWithNumbers($patternPositions, $fullPatternChars);
+                    $this->buildWordWithNumbers($patternPositions, $fullPatternChars);
+
                     break;
                 }
             }
         }
+
+        return $word;
     }
 
-    private function mergeSyllablesAndWordPositionArrays() : void
+    private function mergeSyllablesAndWordPositionArrays(string $word): void
     {
-        ksort($this->finalWordArray);
-        ksort($this->doubledIndexWordArray);
+        ksort($this->finalWords);
+        ksort($this->doubledIndexWords);
         
-        $wordToHyphenateSplit = str_split($this->wordToHyphenate);
-        $wordToHyphenateExpandedArray = [];
+        $wordToHyphenateSplit = str_split($word);
+        $wordToHyphenateExpandedIndices = [];
 
         foreach ($wordToHyphenateSplit as $key => $wordToHyphenateChar) {
-            $wordToHyphenateExpandedArray[$key * 2] = $wordToHyphenateChar;
+            $wordToHyphenateExpandedIndices[$key * 2] = $wordToHyphenateChar;
         }
 
-        $this->finalWordArray = $this->finalWordArray + $wordToHyphenateExpandedArray;
-        ksort($this->finalWordArray);
+        $this->finalWords = $this->finalWords + $wordToHyphenateExpandedIndices;
+        ksort($this->finalWords);
     }
 
-    private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern) : void
+    private function buildWordWithNumbers(Array $patternWithCharPositions, Array $fullPattern): void
     {
-        $this->doubledIndexPatternArray = [];
+        $patternDoubledIndices = [];
 
         foreach ($patternWithCharPositions as $key => $patternCharNoNumber) {
-            $this->doubledIndexPatternArray[$key * 2] = $patternCharNoNumber;
-            $this->doubledIndexWordArray[$key * 2] = $patternCharNoNumber;
+            $patternDoubledIndices[$key * 2] = $patternCharNoNumber;
+            $this->doubledIndexWords[$key * 2] = $patternCharNoNumber;
         }
 
-        $iterationDoubleKey = array_key_first($this->doubledIndexPatternArray);
+        $iterationDoubleKey = array_key_first($patternDoubledIndices);
 
         for ($i = 0; $i < count($fullPattern); $i++) {
             if (is_numeric($fullPattern[$i])) {
-                $this->doubledIndexPatternArray[$iterationDoubleKey - 1] = $fullPattern[$i];
+                $patternDoubledIndices[$iterationDoubleKey - 1] = $fullPattern[$i];
+
                 continue;
             }
 
             $iterationDoubleKey = $iterationDoubleKey + 2;
         }
 
-        ksort($this->doubledIndexPatternArray);
+        ksort($patternDoubledIndices);
 
-        foreach ($this->doubledIndexPatternArray as $key => $value) {
-            if (!isset($this->finalWordArray[$key])){
-                $this->finalWordArray[$key] = $value;
+        foreach ($patternDoubledIndices as $key => $value) {
+            if (!isset($this->finalWords[$key])){
+                $this->finalWords[$key] = $value;
             }
 
-            if (isset($this->finalWordArray[$key]) &&
+            if (isset($this->finalWords[$key]) &&
                 is_numeric($value) &&
-                is_numeric($this->finalWordArray[$key])) {
-                $this->finalWordArray[$key] = max($value, $this->finalWordArray[$key]);
+                is_numeric($this->finalWords[$key])) {
+                $this->finalWords[$key] = max($value, $this->finalWords[$key]);
             }
         }
     }
 
-    private function filterOutNumbersFromArray($arrayToFilter) : array
+    private function filterOutNumbersFromArray($arrayToFilter): array
     {
         foreach ($arrayToFilter as $key => $wordToFilter){
-            $arrayToFilter[$key] = self::removeNumbersFromString($wordToFilter);
+            $arrayToFilter[$key] = $this->removeNumbersFromString($wordToFilter);
         }
 
         return $arrayToFilter;
     }
 
-    private function removeNumbersFromString(String $word) : String
+    private function removeNumbersFromString(string $word): string
     {
         return preg_replace("/[^a-zA-Z.]/", "", $word);
     }
 
-    private function isFirstSyllable(String $word) : bool
+    private function isFirstSyllable(string $word): bool
     {
-        if ((strpos($word, ".") === 0)) {
-            return true;
-        }
-        return false;
+        return str_starts_with($word, '.');
     }
 
-    private function isLastSyllable(String $word) : bool
+    private function isLastSyllable(string $word): bool
     {
-        if (str_ends_with($word, ".")) {
-            return true;
-        }
-        return false;
+        return str_ends_with($word, '.');
     }
 
-    private function finalProcessing() : void
+    private function addHyphensAndWhitespaces(): string
     {
-        foreach ($this->finalWordArray as $key => $value) {
+        foreach ($this->finalWords as $key => $value) {
             if (is_numeric($value)) {
                 if ($value % 2 === 0) {
-                    $this->finalWordArray[$key] = " ";
+                    $this->finalWords[$key] = " ";
                 } else {
-                    $this->finalWordArray[$key] = "-";
+                    $this->finalWords[$key] = "-";
                 }
             }
         }
 
-        $this->finalProcessedWord = implode($this->finalWordArray);
+        return implode($this->finalWords);
     }
 
-    public function getFinalWord() : string
+    private function removeTrailingSymbols(string $finalWord): string
     {
-        return $this->finalProcessedWord;
+        $finalWord = str_replace('.', '', $finalWord);
+        $finalWord = str_replace(' ', '', $finalWord);
+        $finalWord = ltrim($finalWord, '-');
+
+        return rtrim($finalWord, '-');
     }
 
-    public function getSelectedSyllableArray() : array
+    private function clearArrays(): void
     {
-        return $this->selectedSyllableArray;
+        $this->selectedSyllables = [];
+        $this->finalWords = [];
+        $this->doubledIndexWords = [];
     }
 }

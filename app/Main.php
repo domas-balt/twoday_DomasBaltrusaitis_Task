@@ -1,69 +1,71 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 require_once 'Autoloader.php';
 
-use App\Caching\Cache;
-use App\Logger\Handler\FileHandler;
+use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
 use App\Services\FileService;
 use App\Services\HyphenationService;
+use App\Services\ParagraphHyphenationService;
+use App\Services\RegexHyphenationService;
 use App\Services\ResultVisualizationService;
-use Memcached;
+use App\Utilities\Timer;
 
 class Main
 {
-    public function run(): void
+    public function run(array $argv = []): void
     {
+        if (count($argv) <= 1 || !is_string($argv[1]) || !file_exists(__DIR__ . $argv[1])) {
+            throw new \Exception(\InvalidArgumentException::class);
+        }
+
         $loader = new Autoloader();
         $loader->register();
         $loader->addNamespace('App', __DIR__);
 
-        date_default_timezone_set("Europe/Vilnius");
+        date_default_timezone_set('Europe/Vilnius');
 
-        $logFileName = "app_log.txt";
+        $logFileName = '/var/app_log.txt';
 
-        $handler = new FileHandler($logFileName);
+        $syllables = FileService::readDataFromFile( '/var/hyphen.txt');
+        $words = FileService::readDataFromFile($argv[1]);
+
+        $timer = new Timer();
+        $handler = new LogHandler($logFileName);
         $logger = new Logger($handler);
+        $resultVisualizationService = new ResultVisualizationService($logger);
+        $regexHyphenationService = new RegexHyphenationService($syllables);
+        $hyphenationService = new HyphenationService($syllables);
+        $paragraphHyphenationService = new ParagraphHyphenationService($words, $hyphenationService);
+        $paragraphRegexHyphenationService = new ParagraphHyphenationService($words, $regexHyphenationService);
 
-        /*
-        'brew services start memcached'
-         telnet localhost 11211
-        */
-        $memcached = new Memcached();
-        $memcached->addServer("localhost", 11211);
-        $cache = new Cache($memcached, $logger);
+        $logger->logStartOfApp();
 
-        $resultVisualizationService = new ResultVisualizationService($logger, $cache);
+        $timer->startTimer();
 
-        echo "Enter the word you want to hyphenate:\n";
-        $word = trim(fgets(STDIN));
-        $word = strtolower($word);
+        $finalParagraphArray = $paragraphHyphenationService->hyphenateParagraph();
 
-        $resultVisualizationService->startAppLogger();
-        $timerStart = hrtime(true);
+        $resultVisualizationService->visualizeResults($finalParagraphArray,
+            "Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
+        FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphArray);
 
-        if ($cache->has($word)) {
-            $resultVisualizationService->printString("Cached answer: " . $cache->get($word));
-        } else {
-            $syllableArray = FileService::readDataFromFile();
+        $finalRegexParagraphArray = $paragraphRegexHyphenationService->hyphenateParagraph();
 
-            $hyphenationService = new HyphenationService($word, $syllableArray);
-            $hyphenationService->hyphenateWord();
+        $resultVisualizationService->visualizeResults($finalRegexParagraphArray,
+            "Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
+        FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphArray);
 
-            $finalHyphenatedWord = $hyphenationService->getFinalWord();
+        $timer->endTimer();
+        $timeSpent = $timer->getTimeSpent();
 
-            $selectedSyllableArray = $hyphenationService->getSelectedSyllableArray();
-
-            $resultVisualizationService->logSelectedSyllables($selectedSyllableArray);
-            $resultVisualizationService->visualizeResults($finalHyphenatedWord, $word);
-        }
-
-        $timerEnd = hrtime(true);
-        $resultVisualizationService->endAppLogger($timerStart, $timerEnd);
+        $resultVisualizationService->VisualizeString("<< Time spent {$timeSpent} seconds >>\n");
+        $logger->logEndOfApp();
     }
 }
 
 $app = new Main();
-$app->run();
+$app->run($argv);

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Logger;
 
 use App\Logger\Handler\HandlerInterface;
 use DateTimeInterface;
 
-class Logger extends AbstractILogger
+class Logger extends AbstractLogger
 {
     private $handler;
 
@@ -13,6 +15,7 @@ class Logger extends AbstractILogger
     {
         $this->handler = $handler;
     }
+
     public function log(LogLevel $level, $message, array $context = []): void
     {
         $this->handler->handle([
@@ -31,5 +34,15 @@ class Logger extends AbstractILogger
             }
         }
         return strtr($message, $replace);
+    }
+
+    public function logStartOfApp(): void
+    {
+        $this->log(LogLevel::INFO, "<<< STARTING APP >>>");
+    }
+
+    public function logEndOfApp(): void
+    {
+        $this->log(LogLevel::INFO, "<<< STOPPING APP >>>");
     }
 }

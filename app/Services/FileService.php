@@ -1,20 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Exception;
 
 class FileService
 {
-    private const string FILE_NAME = "/Files/hyphen.txt";
-    public static function readDataFromFile(): array
+    public static function readDataFromFile(string $fileName): array
     {
-        $fileName = dirname(__DIR__, 1) . self::FILE_NAME;
+        $fullPath = self::getFullPath($fileName);
 
-        if (file_exists($fileName) && is_readable($fileName)) {
-            return file($fileName);
+        if (file_exists($fullPath) && is_readable($fullPath)) {
+            return file($fullPath);
         }
 
         throw new Exception("File not found or not readable");
+    }
+
+    public static function printDataToFile(string $fileName, array $content): void
+    {
+        $fullPath = self::getFullPath($fileName);
+        file_put_contents($fullPath, $content);
+    }
+
+    private static function getFullPath($fileName): string
+    {
+        return dirname(__DIR__) . $fileName;
     }
 }
