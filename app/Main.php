@@ -46,6 +46,10 @@ class Main
         $userInputService->askForDatabaseFileUpdates();
         $isDbSource = $userInputService->chooseHyphenationSource();
 
+        //TODO: Pasiimk ID, isidek tada zodi ir skiemenuota zodi i lentele. Tada isidek skiemenis i lentele, tada isidek i many to many lentele viska. Tada xj zj. Delete apgalvok, jei tipo nauja zodziu faila ikelia
+        //TODO: kas tada bus? Reik nucascade'int viska.
+//        $lastInsertId = $wordRepository->insertWord("galvanized");
+
         if ($isDbSource) {
             $syllables = $syllableRepository->getAllSyllables();
         } else {

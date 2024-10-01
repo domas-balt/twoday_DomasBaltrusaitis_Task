@@ -36,6 +36,15 @@ class WordRepository
         }
     }
 
+    public function insertWord(string $word): string
+    {
+        $stmt = $this->connection->prepare("INSERT INTO words (words_text) VALUES (:words_text)");
+
+        $stmt->execute(['words_text' => $word]);
+
+        return $this->connection->lastInsertId();
+    }
+
     public function clearWordTable(): void
     {
         $stmt = $this->connection->prepare('DELETE FROM words');
