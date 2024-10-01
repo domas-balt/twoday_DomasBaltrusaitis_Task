@@ -9,7 +9,7 @@ use PDOException;
 
 class DBConnection
 {
-    public static function tryConnect(): void
+    public static function tryConnect(): ?PDO
     {
         $host = getenv('MYSQL_HOST');
         $db = getenv('MYSQL_DB');
@@ -19,13 +19,17 @@ class DBConnection
         $dsn = "mysql:host=$host;dbname=$db;charset=UTF8";
 
         try {
-            $pdo = new PDO($dsn, $user, $password);
+            $pdo = new PDO($dsn, $user, $password, [
+                PDO::MYSQL_ATTR_LOCAL_INFILE => true
+            ]);
 
             if ($pdo) {
-                echo "Connection successful";
+                echo "Connection successful\n";
             }
         } catch (PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
+            echo "Connection failed: " . $e->getMessage() . PHP_EOL;
         }
+
+        return $pdo;
     }
 }

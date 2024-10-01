@@ -10,6 +10,8 @@ use App\Logger\LogLevel;
 
 class ResultVisualizationService
 {
+    private const string DEFAULT_SEPARATOR = "/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/";
+
     public function __construct(
         private readonly Logger $logger,
     ){
@@ -17,10 +19,11 @@ class ResultVisualizationService
 
     public function visualizeResults(array $hyphenatedResults, string $infoString): void
     {
-        print($infoString);
+        print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
+
         foreach ($hyphenatedResults as $result) {
             $this->logger->log(LogLevel::INFO, "Hyphenated word <{$result}>");
-            print_r("{$result} \n");
+            print_r("> {$result} \n");
         }
     }
 

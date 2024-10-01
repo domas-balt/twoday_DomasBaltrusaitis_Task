@@ -25,6 +25,25 @@ class FileService
         file_put_contents($fullPath, $content);
     }
 
+    public static function readEnvFile(string $fileName): void
+    {
+        $fullPath = self::getFullPath($fileName);
+
+        if (is_file($fullPath))
+        {
+            $file = new \SplFileObject($fullPath);
+
+            while ($file->eof() === false)
+            {
+                $envVariable = trim($file->fgets());
+                if($envVariable !== "")
+                {
+                    putenv($envVariable);
+                }
+            }
+        }
+    }
+
     private static function getFullPath($fileName): string
     {
         return dirname(__DIR__) . $fileName;
