@@ -77,7 +77,6 @@ class SyllableRepository
 
         foreach ($selectedSyllableIds as $selectedSyllableId) {
             $stmt = $this->connection->prepare("SELECT text FROM selected_syllables WHERE id = (:selected_syllable_id)");
-
             $stmt->execute(['selected_syllable_id' => $selectedSyllableId]);
 
             $selectedPattern = $stmt->fetch(PDO::FETCH_ASSOC);

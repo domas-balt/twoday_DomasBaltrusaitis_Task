@@ -43,9 +43,8 @@ class Main
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
 
         $isFile = $userInputService->checkUserArgInput($argv[1]);
-//        $userInputService->askAboutDatabaseFileUpdates();
-//        $isDbSource = $userInputService->chooseHyphenationSource();
-        $isDbSource = true;
+        $userInputService->askAboutDatabaseFileUpdates();
+        $isDbSource = $userInputService->chooseHyphenationSource();
 
         if ($isDbSource) {
             $syllables = $syllableRepository->getAllSyllables();
@@ -56,8 +55,7 @@ class Main
         if ($isFile) {
             $words = FileService::readDataFromFile($argv[2]);
         } else {
-//            $words[] = $userInputService->readWordToHyphenate();
-            $words[0] = "malkininkas";
+            $words[] = $userInputService->readWordToHyphenate();
         }
 
         $wordPrimaryKey = "";
@@ -92,8 +90,6 @@ class Main
             $resultVisualizationService->visualizeResults($syllables,
                 "These syllables were used in this word's hyphenation");
         } else {
-            $wordPrimaryKey = $wordRepository->insertWord($words[0]);
-
             $finalParagraphLines = $paragraphHyphenationService->hyphenateParagraph();
 
             $resultVisualizationService->visualizeResults($finalParagraphLines,
@@ -105,6 +101,11 @@ class Main
             $resultVisualizationService->visualizeResults($finalRegexParagraphLines,
                 "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
             FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphLines);
+        }
+
+        if (!$wordExistsDb && $isDbSource)
+        {
+            $wordPrimaryKey = $wordRepository->insertWord($words[0]);
         }
 
         $timer->endTimer();
@@ -127,9 +128,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    '',
-    'word',
-    '/var/paragraph.txt'
-]);
+$app->run($argv);
