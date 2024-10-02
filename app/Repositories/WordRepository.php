@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use http\Exception\InvalidArgumentException;
 use PDO;
 use PDOException;
 
@@ -45,15 +44,13 @@ class WordRepository
         return $this->connection->lastInsertId();
     }
 
-    public function insertHyphenatedWord(string $word, string $foreignKey): string
+    public function insertHyphenatedWord(string $word, string $foreignKey): void
     {
         $stmt = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
         $stmt->execute([$word, $foreignKey]);
-
-        return $this->connection->lastInsertId();
     }
 
-    public function insertHyphenatedWordAndSyllableIds(array $syllableIds, string $hyphenatedWordId): void
+    public function insertHyphenatedWordAndSyllableIds(array $syllableIds, int $hyphenatedWordId): void
     {
         $stmt = $this->connection->prepare("INSERT INTO selected_Syllables_hyphenated_Words (hyphenated_word_id, selected_syllable_id) VALUES (?,?)");
 
@@ -72,6 +69,14 @@ class WordRepository
         return !empty($result);
     }
 
+    public function findHyphenatedWordById(int $foreignKey): mixed
+    {
+        $stmt = $this->connection->prepare("SELECT * FROM hyphenated_words WHERE word_id = :word_id");
+        $stmt->execute(['word_id' => $foreignKey]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findHyphenatedWord(string $word): mixed
     {
         $stmt = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
@@ -79,10 +84,7 @@ class WordRepository
 
         $wordResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $stmt = $this->connection->prepare("SELECT * FROM hyphenated_words WHERE word_id = :word_id");
-        $stmt->execute(['word_id' => $wordResult['id']]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->findHyphenatedWordById($wordResult['id']);
     }
 
     public function clearWordTable(): void

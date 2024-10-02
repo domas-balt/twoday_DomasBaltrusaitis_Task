@@ -16,6 +16,7 @@ use App\Services\HyphenationService;
 use App\Services\ParagraphHyphenationService;
 use App\Services\RegexHyphenationService;
 use App\Services\ResultVisualizationService;
+use App\Services\TransactionService;
 use App\Services\UserInputService;
 use App\Utilities\Timer;
 
@@ -64,6 +65,7 @@ class Main
         $timer = new Timer();
         $handler = new LogHandler($logFileName);
         $logger = new Logger($handler);
+        $transactionService = new TransactionService($wordRepository, $syllableRepository, $dbConnection);
         $resultVisualizationService = new ResultVisualizationService($logger);
         $regexHyphenationService = new RegexHyphenationService($syllables);
         $hyphenationService = new HyphenationService($syllables);
@@ -86,7 +88,7 @@ class Main
             $resultVisualizationService->visualizeResults($finalParagraphLines,
                 "This word has already been hyphenated. It was found in the Database. No calculations proceeding...");
 
-            $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWordRow['id']);
+            $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWordRow['id'], true);
             $resultVisualizationService->visualizeResults($syllables,
                 "These syllables were used in this word's hyphenation");
         } else {
@@ -120,9 +122,10 @@ class Main
             $resultVisualizationService->visualizeResults($syllablesWithNumbers,
                 "These patterns where used in hyphenating the word:");
 
-            $hyphenatedWordPrimaryKey = $wordRepository->insertHyphenatedWord($finalParagraphLines[0], $wordPrimaryKey);
-            $selectedSyllableKeys = $syllableRepository->insertSelectedSyllables($syllablesWithNumbers);
-            $wordRepository->insertHyphenatedWordAndSyllableIds($selectedSyllableKeys, $hyphenatedWordPrimaryKey);
+            $syllableIds = $transactionService->syllableWordInsertTransaction($finalParagraphLines[0], $wordPrimaryKey, $syllablesWithNumbers);
+
+            $hyphenatedWordRow = $wordRepository->findHyphenatedWordById((int)$wordPrimaryKey);
+            $wordRepository->insertHyphenatedWordAndSyllableIds($syllableIds, $hyphenatedWordRow['id']);
         }
     }
 }

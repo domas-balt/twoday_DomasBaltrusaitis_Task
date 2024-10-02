@@ -50,19 +50,18 @@ class SyllableRepository
 
     public function insertSelectedSyllables(array $selectedSyllables): array
     {
-        $selectedSyllableKeys = [];
+        $selectedSyllableIds = [];
         $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)");
 
         foreach ($selectedSyllables as $selectedSyllable) {
             $stmt->execute(['selected_syllable_text' => $selectedSyllable]);
-
-            $selectedSyllableKeys[] = $this->connection->lastInsertId();
+            $selectedSyllableIds[] = $this->connection->lastInsertId();
         }
 
-        return $selectedSyllableKeys;
+        return $selectedSyllableIds;
     }
 
-    public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
+    public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId, bool $getText = false, bool $getKeys = false): array
     {
         $stmt = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");
         $stmt->execute(['hyphenated_word_id' => $hyphenatedWordId]);
@@ -81,7 +80,15 @@ class SyllableRepository
 
             $selectedPattern = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $selectedSyllablePatterns[]= $selectedPattern['text'];
+            if ($getText) {
+                $selectedSyllablePatterns[]= $selectedPattern['text'];
+
+                continue;
+            }
+
+            if ($getKeys) {
+                $selectedSyllablePatterns[]= $selectedPattern['id'];
+            }
         }
 
         return $selectedSyllablePatterns;
