@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use http\Exception\InvalidArgumentException;
 use PDO;
 use PDOException;
 
@@ -27,7 +28,7 @@ class WordRepository
             $stmt = $this->connection->prepare(
                 "LOAD DATA LOCAL INFILE :path INTO TABLE words
                 FIELDS TERMINATED BY ''
-                (words_text)"
+                (text)"
             );
 
             $stmt->execute(['path' => $path]);
@@ -38,11 +39,50 @@ class WordRepository
 
     public function insertWord(string $word): string
     {
-        $stmt = $this->connection->prepare("INSERT INTO words (words_text) VALUES (:words_text)");
-
+        $stmt = $this->connection->prepare("INSERT INTO words (text) VALUES (:words_text)");
         $stmt->execute(['words_text' => $word]);
 
         return $this->connection->lastInsertId();
+    }
+
+    public function insertHyphenatedWord(string $word, string $foreignKey): string
+    {
+        $stmt = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
+        $stmt->execute([$word, $foreignKey]);
+
+        return $this->connection->lastInsertId();
+    }
+
+    public function insertHyphenatedWordAndSyllableIds(array $syllableIds, string $hyphenatedWordId): void
+    {
+        $stmt = $this->connection->prepare("INSERT INTO selected_Syllables_hyphenated_Words (hyphenated_word_id, selected_syllable_id) VALUES (?,?)");
+
+        foreach ($syllableIds as $syllableId) {
+            $stmt->execute([$hyphenatedWordId, $syllableId]);
+        }
+    }
+
+    public function checkIfWordExistsDb(string $word): bool
+    {
+        $stmt = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
+        $stmt->execute(['text' => $word]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return !empty($result);
+    }
+
+    public function findHyphenatedWord(string $word): mixed
+    {
+        $stmt = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
+        $stmt->execute(['text' => $word]);
+
+        $wordResult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stmt = $this->connection->prepare("SELECT * FROM hyphenated_words WHERE word_id = :word_id");
+        $stmt->execute(['word_id' => $wordResult['id']]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function clearWordTable(): void

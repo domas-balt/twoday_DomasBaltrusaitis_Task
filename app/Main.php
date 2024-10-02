@@ -43,12 +43,9 @@ class Main
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
 
         $isFile = $userInputService->checkUserArgInput($argv[1]);
-        $userInputService->askForDatabaseFileUpdates();
-        $isDbSource = $userInputService->chooseHyphenationSource();
-
-        //TODO: Pasiimk ID, isidek tada zodi ir skiemenuota zodi i lentele. Tada isidek skiemenis i lentele, tada isidek i many to many lentele viska. Tada xj zj. Delete apgalvok, jei tipo nauja zodziu faila ikelia
-        //TODO: kas tada bus? Reik nucascade'int viska.
-//        $lastInsertId = $wordRepository->insertWord("galvanized");
+//        $userInputService->askAboutDatabaseFileUpdates();
+//        $isDbSource = $userInputService->chooseHyphenationSource();
+        $isDbSource = true;
 
         if ($isDbSource) {
             $syllables = $syllableRepository->getAllSyllables();
@@ -57,11 +54,15 @@ class Main
         }
 
         if ($isFile) {
-            $words = FileService::readDataFromFile($argv[1]);
+            $words = FileService::readDataFromFile($argv[2]);
         } else {
-            $words[] = $userInputService->readWordToHyphenate();
+//            $words[] = $userInputService->readWordToHyphenate();
+            $words[0] = "malkininkas";
         }
 
+        $wordPrimaryKey = "";
+        $wordExistsDb = false;
+        $hyphenatedWordRow = [];
         $timer = new Timer();
         $handler = new LogHandler($logFileName);
         $logger = new Logger($handler);
@@ -75,23 +76,53 @@ class Main
 
         $timer->startTimer();
 
-        $finalParagraphArray = $paragraphHyphenationService->hyphenateParagraph();
+        if (!$isFile) {
+            $wordExistsDb = $wordRepository->checkIfWordExistsDb($words[0]);
+            if ($wordExistsDb) {
+                $hyphenatedWordRow = $wordRepository->findHyphenatedWord($words[0]);
+            }
+        }
 
-        $resultVisualizationService->visualizeResults($finalParagraphArray,
-            "[INFO] Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
-        FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphArray);
+        if ($wordExistsDb && $hyphenatedWordRow) {
+            $finalParagraphLines[0] = $hyphenatedWordRow['text'];
+            $resultVisualizationService->visualizeResults($finalParagraphLines,
+                "This word has already been hyphenated. It was found in the Database. No calculations proceeding...");
 
-        $finalRegexParagraphArray = $paragraphRegexHyphenationService->hyphenateParagraph();
+            $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWordRow['id']);
+            $resultVisualizationService->visualizeResults($syllables,
+                "These syllables were used in this word's hyphenation");
+        } else {
+            $wordPrimaryKey = $wordRepository->insertWord($words[0]);
 
-        $resultVisualizationService->visualizeResults($finalRegexParagraphArray,
-            "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
-        FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphArray);
+            $finalParagraphLines = $paragraphHyphenationService->hyphenateParagraph();
+
+            $resultVisualizationService->visualizeResults($finalParagraphLines,
+                "[INFO] Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
+            FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphLines);
+
+            $finalRegexParagraphLines = $paragraphRegexHyphenationService->hyphenateParagraph();
+
+            $resultVisualizationService->visualizeResults($finalRegexParagraphLines,
+                "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
+            FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphLines);
+        }
 
         $timer->endTimer();
         $timeSpent = $timer->getTimeSpent();
 
         $resultVisualizationService->VisualizeString("<< Time spent {$timeSpent} seconds >>\n");
         $logger->logEndOfApp();
+
+        if (!$isFile && $isDbSource && !$hyphenatedWordRow) {
+            $syllablesWithNumbers = $hyphenationService->getPatternsWithNumbers();
+
+            $resultVisualizationService->visualizeResults($syllablesWithNumbers,
+                "These patterns where used in hyphenating the word:");
+
+            $hyphenatedWordPrimaryKey = $wordRepository->insertHyphenatedWord($finalParagraphLines[0], $wordPrimaryKey);
+            $selectedSyllableKeys = $syllableRepository->insertSelectedSyllables($syllablesWithNumbers);
+            $wordRepository->insertHyphenatedWordAndSyllableIds($selectedSyllableKeys, $hyphenatedWordPrimaryKey);
+        }
     }
 }
 

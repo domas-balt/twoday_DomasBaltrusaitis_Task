@@ -16,7 +16,7 @@ readonly class UserInputService
     ){
     }
 
-    public function askForDatabaseFileUpdates(): void
+    public function askAboutDatabaseFileUpdates(): void
     {
         echo "Would you like to upload a new file which would change the existing files in the database?"
          . PHP_EOL . "<< Enter [Y/y] for approval or any other button if you don't want to. >>" . PHP_EOL;

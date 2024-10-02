@@ -9,17 +9,23 @@ class HyphenationService implements HyphenationServiceInterface
     private array $doubledIndexWords = [];
     private array $selectedSyllables = [];
     private array $finalWords = [];
+    private array $patternsWithNumbers = [];
 
     public function __construct(
         private readonly array $syllables
     ){
     }
 
+    public function getPatternsWithNumbers(): array
+    {
+        return $this->patternsWithNumbers;
+    }
+
     public function hyphenateWords(array $words): array
     {
         foreach ($words as $key => $word) {
-            $patternsWithNumbers = $this->findUsableSyllables($word);
-            $word = $this->findSyllablePositionsInWord($word, $patternsWithNumbers);
+            $this->findUsableSyllables($word);
+            $word = $this->findSyllablePositionsInWord($word);
             $this->mergeSyllablesAndWordPositionArrays($word);
             $finalProcessedWord = $this->addHyphensAndWhitespaces();
 
@@ -31,7 +37,7 @@ class HyphenationService implements HyphenationServiceInterface
         return $words;
     }
 
-    private function findUsableSyllables(string $word): array
+    private function findUsableSyllables(string $word): void
     {
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllables);
         $patternsWithNumbers = [];
@@ -60,20 +66,18 @@ class HyphenationService implements HyphenationServiceInterface
         }
 
         foreach ($this->selectedSyllables as $key => $value) {
-            $patternsWithNumbers[$key] = $this->syllables[$key];
+            $this->patternsWithNumbers[$key] = $this->syllables[$key];
         }
-
-        return $patternsWithNumbers;
     }
 
-    private function findSyllablePositionsInWord(string $word, array $patternsWithNumbers): string
+    private function findSyllablePositionsInWord(string $word): string
     {
         $word = ".{$word}.";
         $wordChars = str_split($word);
 
         foreach ($this->selectedSyllables as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->removeNumbersFromString($pattern));
-            $fullPatternChars = str_split(str_replace("\n","",$patternsWithNumbers[$key]));
+            $fullPatternChars = str_split(str_replace("\n","",$this->patternsWithNumbers[$key]));
 
             $successfulMatchCount = 0;
             $comparisonBuffer = 0;
