@@ -37,7 +37,7 @@ class ResultVisualizationService
         print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
 
         foreach ($syllables as $syllable) {
-            echo ">{$syllable->getPattern()}}" . PHP_EOL;
+            echo "> {$syllable->getPattern()}" . PHP_EOL;
         }
     }
 
@@ -49,7 +49,7 @@ class ResultVisualizationService
         print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
 
         foreach ($selectedSyllables as $selectedSyllable) {
-            echo ">{$selectedSyllable->getText()}}" . PHP_EOL;
+            echo "> {$selectedSyllable->getText()}" . PHP_EOL;
         }
     }
 

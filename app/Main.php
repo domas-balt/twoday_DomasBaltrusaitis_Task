@@ -65,7 +65,7 @@ class Main
             $words = FileService::readDataFromFile($argv[2]);
         } else {
 //            $words[] = $userInputService->readWordToHyphenate();
-            $words[0] = 'gamtotyrininkas';
+            $words[0] = 'generator';
         }
 
         $wordEntity = new Word(0, "");

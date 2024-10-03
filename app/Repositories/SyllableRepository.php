@@ -87,7 +87,7 @@ class SyllableRepository
 
             $selectedPattern = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $selectedSyllables[] = new SelectedSyllable($selectedPattern['id'], $selectedPattern['text']);
+            $selectedSyllables[] = new SelectedSyllable($selectedSyllableId, $selectedPattern['text']);
         }
 
         return $selectedSyllables;
