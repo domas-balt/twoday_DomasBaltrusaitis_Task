@@ -17,7 +17,7 @@ class WordRepository
 
     }
 
-    public function loadWordsFromFileToDb(string $fileName): void
+    public function uploadWordsFromFile(string $fileName): void
     {
         $path = dirname(__DIR__) . $fileName;
 
@@ -38,6 +38,22 @@ class WordRepository
         }
     }
 
+    public function getAllWords(): array
+    {
+        $words = [];
+
+        $stmt = $this->connection->prepare("SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL");
+        $stmt->execute();
+
+        $wordRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($wordRows as $wordRow) {
+            $words[$wordRow['id']] = $wordRow['text'];
+        }
+
+        return $words;
+    }
+
     public function insertWord(string $word): Word
     {
         $stmt = $this->connection->prepare("INSERT INTO words (text) VALUES (:words_text)");
@@ -50,8 +66,21 @@ class WordRepository
 
     public function insertHyphenatedWord(string $word, int $foreignKey): void
     {
-        $stmt = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
-        $stmt->execute([$word, $foreignKey]);
+        $wordExists = $this->checkIfHyphenatedWordExistsDb($foreignKey);
+
+        if (!$wordExists)
+        {
+            $stmt = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
+            $stmt->execute([$word, $foreignKey]);
+        }
+    }
+
+    public function insertManyHyphenatedWords(array $words): void
+    {
+        foreach ($words as $key => $word) {
+            $stmt = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
+            $stmt->execute([$word, $key]);
+        }
     }
 
     public function insertHyphenatedWordAndSyllableIds(array $syllableIds, int $hyphenatedWordId): void

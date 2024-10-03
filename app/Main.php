@@ -43,14 +43,21 @@ class Main
 
         $dbConnection = DBConnection::tryConnect();
         $syllables = [];
+        $timer = new Timer();
+        $handler = new LogHandler($logFileName);
+        $logger = new Logger($handler);
         $wordRepository = new WordRepository($dbConnection);
         $syllableRepository = new SyllableRepository($dbConnection);
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
 
+
         $isFile = $userInputService->checkUserArgInput($argv[1]);
-//        $userInputService->askAboutDatabaseFileUpdates();
-//        $isDbSource = $userInputService->chooseHyphenationSource();
-        $isDbSource = true;
+        $applicationType = $userInputService->checkUserArgInput($argv[1]);
+        $userInputService->askAboutDatabaseFileUpdates();
+        $isDbSource = $userInputService->chooseHyphenationSource();
+
+        $logger->logStartOfApp();
+        $timer->startTimer();
 
         if ($isDbSource) {
             $syllables = $syllableRepository->getAllSyllables();
@@ -61,11 +68,12 @@ class Main
             }
         }
 
-        if ($isFile) {
+        if ($applicationType === $userInputService::APP_TYPE_FILE) {
             $words = FileService::readDataFromFile($argv[2]);
+        } elseif ($applicationType === $userInputService::APP_TYPE_WORD) {
+            $words[] = $userInputService->readWordToHyphenate();
         } else {
-//            $words[] = $userInputService->readWordToHyphenate();
-            $words[0] = 'generator';
+            $words = $wordRepository->getAllWords();
         }
 
         $wordEntity = new Word(0, "");
@@ -73,9 +81,6 @@ class Main
         $hyphenatedWordExists = false;
         $wordExistsDb = false;
 
-        $timer = new Timer();
-        $handler = new LogHandler($logFileName);
-        $logger = new Logger($handler);
         $transactionService = new TransactionService($wordRepository, $syllableRepository, $dbConnection);
         $resultVisualizationService = new ResultVisualizationService($logger);
         $regexHyphenationService = new RegexHyphenationService($syllables);
@@ -83,11 +88,7 @@ class Main
         $paragraphHyphenationService = new ParagraphHyphenationService($words, $hyphenationService);
         $paragraphRegexHyphenationService = new ParagraphHyphenationService($words, $regexHyphenationService);
 
-        $logger->logStartOfApp();
-
-        $timer->startTimer();
-
-        if (!$isFile) {
+        if ($applicationType === $userInputService::APP_TYPE_WORD) {
             $wordExistsDb = $wordRepository->checkIfWordExistsDb($words[0]);
             if ($wordExistsDb) {
                 $wordEntity = $wordRepository->findWordByText($words[0]);
@@ -114,23 +115,23 @@ class Main
                 "[INFO] Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
             FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphLines);
 
-            $finalRegexParagraphLines = $paragraphRegexHyphenationService->hyphenateParagraph();
+            if ($applicationType === $userInputService::APP_TYPE_DATABASE) {
+                $wordRepository->insertManyHyphenatedWords($finalParagraphLines);
+            }
 
-            $resultVisualizationService->visualizeResults($finalRegexParagraphLines,
-                "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
-            FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphLines);
+            if ($applicationType !== $userInputService::APP_TYPE_DATABASE) {
+                $finalRegexParagraphLines = $paragraphRegexHyphenationService->hyphenateParagraph();
+
+                $resultVisualizationService->visualizeResults($finalRegexParagraphLines,
+                    "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
+                FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphLines);
+            }
         }
 
-        if (!$wordExistsDb && $isDbSource)
+        if (!$wordExistsDb && $isDbSource && $applicationType === $userInputService::APP_TYPE_WORD)
         {
             $wordEntity = $wordRepository->insertWord($words[0]);
         }
-
-        $timer->endTimer();
-        $timeSpent = $timer->getTimeSpent();
-
-        $resultVisualizationService->VisualizeString("<< Time spent {$timeSpent} seconds >>\n");
-        $logger->logEndOfApp();
 
         if (!$isFile && $isDbSource && !$hyphenatedWordExists) {
             $syllablesWithNumbers = $hyphenationService->getSyllables();
@@ -143,12 +144,13 @@ class Main
             $hyphenatedWord = $wordRepository->findHyphenatedWordById($wordEntity->getId());
             $wordRepository->insertHyphenatedWordAndSyllableIds($syllableIds, $hyphenatedWord->getId());
         }
+
+        $timer->endTimer();
+        $timeSpent = $timer->getTimeSpent();
+        $resultVisualizationService->VisualizeString("<< Time spent {$timeSpent} seconds >>\n");
+        $logger->logEndOfApp();
     }
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'word',
-    2 => '/var/paragraph.txt'
-]);
+$app->run($argv);

@@ -10,6 +10,10 @@ use http\Exception\InvalidArgumentException;
 
 readonly class UserInputService
 {
+    public const int APP_TYPE_FILE = 1;
+    public const int APP_TYPE_WORD = 2;
+    public const int APP_TYPE_DATABASE = 3;
+
     public function __construct(
         private WordRepository $wordRepository,
         private SyllableRepository $syllableRepository
@@ -50,16 +54,18 @@ readonly class UserInputService
         }
     }
 
-    public function checkUserArgInput(string $hyphenationType): bool
+    public function checkUserArgInput(string $hyphenationType): int
     {
         switch ($hyphenationType) {
             case "file":
-                return true;
+                return self::APP_TYPE_FILE;
             case "word":
-                return false;
+                return self::APP_TYPE_WORD;
+            case "database":
+                return self::APP_TYPE_DATABASE;
             default:
                 throw new InvalidArgumentException("The app is ran as depicted here: 'php Main.php file/word textFilePath'.
-                 Choose one of the keywords 'file' or 'word'.");
+                 Choose one of the keywords 'file/word/database'.");
         }
     }
 
@@ -80,7 +86,7 @@ readonly class UserInputService
             case 1:
                 echo "Input filename (eg. /var/words.txt):" . PHP_EOL;
                 $this->wordRepository->clearWordTable();
-                $this->wordRepository->loadWordsFromFileToDb(readline());
+                $this->wordRepository->uploadWordsFromFile(readline());
 
                 break;
             case 2:

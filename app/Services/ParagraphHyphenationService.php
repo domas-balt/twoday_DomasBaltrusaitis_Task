@@ -18,6 +18,7 @@ class ParagraphHyphenationService
 
     public function hyphenateParagraph(): array
     {
+        $counter = 0;
         foreach ($this->paragraphLines as $key => $paragraphLine) {
             $splitLine = $this->splitLineByDelimiter($paragraphLine);
 
@@ -30,6 +31,8 @@ class ParagraphHyphenationService
                 $hyphenatedWord = $this->hyphenationService->hyphenateWords($wordsToHyphenate);
                 $splitLine[$wordKey] = $hyphenatedWord[0];
                 $wordsToHyphenate = [];
+
+                print($counter++ . PHP_EOL);
             }
 
             $this->hyphenatedLines[$key] = implode($splitLine);
