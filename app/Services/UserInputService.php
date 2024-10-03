@@ -18,8 +18,8 @@ readonly class UserInputService
 
     public function askAboutDatabaseFileUpdates(): void
     {
-        echo "Would you like to upload a new file which would change the existing files in the database?"
-         . PHP_EOL . "<< Enter [Y/y] for approval or any other button if you don't want to. >>" . PHP_EOL;
+        echo "Would you like to upload a new file which would change the existing files in the database?" .
+            PHP_EOL . "<< Enter [Y/y] for approval or any other button if you don't want to. >>" . PHP_EOL;
 
         $userInput = readline();
 
@@ -37,8 +37,8 @@ readonly class UserInputService
 
     public function chooseHyphenationSource(): bool
     {
-        echo "Would you like the program to use the Database as it's source?"
-        . PHP_EOL . "<< Enter [Y/y] for approval or any other button to use local files as the source." . PHP_EOL;
+        echo "Would you like the program to use the Database as it's source?" .
+            PHP_EOL . "<< Enter [Y/y] for approval or any other button to use local files as the source." . PHP_EOL;
 
         $userInput = readline();
 
@@ -71,20 +71,20 @@ readonly class UserInputService
 
     private function askFilenameAndTable(): void
     {
-        echo "Which table would you like to update?
-        \n<< Enter [1] for the Words table | Enter [2] for the Syllables table >>\n";
+        echo "Which table would you like to update?" .
+            PHP_EOL . "<< Enter [1] for the Words table | Enter [2] for the Syllables table >>" . PHP_EOL;
 
         $userInput = readline();
 
         switch ($userInput) {
             case 1:
-                echo "Input filename (eg. /var/words.txt):\n";
+                echo "Input filename (eg. /var/words.txt):" . PHP_EOL;
                 $this->wordRepository->clearWordTable();
                 $this->wordRepository->loadWordsFromFileToDb(readline());
 
                 break;
             case 2:
-                echo "Input filename (eg. /var/hyphen.txt):\n";
+                echo "Input filename (eg. /var/hyphen.txt):" . PHP_EOL;
                 $this->syllableRepository->clearSyllableTable();
                 $this->syllableRepository->loadSyllablesFromFileToDb(readline());
 

@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-readonly class RegexHyphenationService implements HyphenationServiceInterface
+use App\Entities\Syllable;
+
+class RegexHyphenationService implements HyphenationServiceInterface
 {
-    public function __construct(
-        private array $syllables,
-    ){
+    private array $syllables;
+
+    /**
+     * @param Syllable[] $syllables
+     */
+    public function __construct(array $syllables)
+    {
+        foreach ($syllables as $syllable) {
+            $this->syllables[] = $syllable->getPattern();
+        }
     }
 
     public function hyphenateWords(array $words): array

@@ -6,15 +6,11 @@ namespace App\Entities;
 
 class HyphenatedWord
 {
-    private int $id;
-    private string $text;
-    private int $wordId;
-
-    public function __construct(int $id, string $text, int $wordId)
-    {
-        $this->id = $id;
-        $this->text = $text;
-        $this->wordId = $wordId;
+    public function __construct(
+        private int $id,
+        private string $text,
+        private int $wordId
+    ){
     }
 
     public function getId(): int

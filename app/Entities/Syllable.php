@@ -6,13 +6,10 @@ namespace App\Entities;
 
 class Syllable
 {
-    private int $id;
-    private string $pattern;
-
-    public function __construct(int $id, string $pattern)
-    {
-        $this->id = $id;
-        $this->pattern = $pattern;
+    public function __construct(
+        private int $id,
+        private string $pattern
+    ){
     }
 
     public function getId(): int

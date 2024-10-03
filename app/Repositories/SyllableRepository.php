@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Entities\SelectedSyllable;
+use App\Entities\Syllable;
 use PDO;
 
 class SyllableRepository
@@ -42,26 +44,30 @@ class SyllableRepository
         $filteredSyllables = [];
 
         foreach ($unfilteredSyllableArrays as $unfilteredSyllables) {
-            $filteredSyllables[] = $unfilteredSyllables['pattern'];
+            $syllable = new Syllable($unfilteredSyllables['id'], $unfilteredSyllables['pattern']);
+            $filteredSyllables[] = $syllable;
         }
 
         return $filteredSyllables;
     }
 
+    /**
+     * @param Syllable[] $selectedSyllables
+     */
     public function insertSelectedSyllables(array $selectedSyllables): array
     {
         $selectedSyllableIds = [];
         $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)");
 
         foreach ($selectedSyllables as $selectedSyllable) {
-            $stmt->execute(['selected_syllable_text' => $selectedSyllable]);
+            $stmt->execute(['selected_syllable_text' => $selectedSyllable->getPattern()]);
             $selectedSyllableIds[] = $this->connection->lastInsertId();
         }
 
         return $selectedSyllableIds;
     }
 
-    public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId, bool $getText = false, bool $getKeys = false): array
+    public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
     {
         $stmt = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");
         $stmt->execute(['hyphenated_word_id' => $hyphenatedWordId]);
@@ -69,7 +75,7 @@ class SyllableRepository
         $wordSyllableRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $selectedSyllableIds = [];
-        $selectedSyllablePatterns = [];
+        $selectedSyllables = [];
 
         foreach ($wordSyllableRows as $syllableRow) {
             $selectedSyllableIds[] = $syllableRow['selected_syllable_id'];
@@ -81,18 +87,10 @@ class SyllableRepository
 
             $selectedPattern = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($getText) {
-                $selectedSyllablePatterns[]= $selectedPattern['text'];
-
-                continue;
-            }
-
-            if ($getKeys) {
-                $selectedSyllablePatterns[]= $selectedPattern['id'];
-            }
+            $selectedSyllables[] = new SelectedSyllable($selectedPattern['id'], $selectedPattern['text']);
         }
 
-        return $selectedSyllablePatterns;
+        return $selectedSyllables;
     }
 
     public function clearSyllableTable(): void

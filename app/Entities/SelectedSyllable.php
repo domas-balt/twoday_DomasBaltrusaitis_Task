@@ -6,13 +6,10 @@ namespace App\Entities;
 
 class SelectedSyllable
 {
-    private int $id;
-    private string $text;
-
-    public function __construct(int $id, string $text)
-    {
-        $this->id = $id;
-        $this->text = $text;
+    public function __construct(
+        private int $id,
+        private string $text
+    ){
     }
 
     public function getId(): int
