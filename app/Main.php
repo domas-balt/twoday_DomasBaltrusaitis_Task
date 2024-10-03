@@ -62,6 +62,7 @@ class Main
         $wordPrimaryKey = "";
         $wordExistsDb = false;
         $hyphenatedWordRow = [];
+
         $timer = new Timer();
         $handler = new LogHandler($logFileName);
         $logger = new Logger($handler);
@@ -88,7 +89,7 @@ class Main
             $resultVisualizationService->visualizeResults($finalParagraphLines,
                 "This word has already been hyphenated. It was found in the Database. No calculations proceeding...");
 
-            $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWordRow['id'], true);
+            $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWordRow['id'], getText: true);
             $resultVisualizationService->visualizeResults($syllables,
                 "These syllables were used in this word's hyphenation");
         } else {

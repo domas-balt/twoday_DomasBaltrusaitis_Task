@@ -67,6 +67,7 @@ class SyllableRepository
         $stmt->execute(['hyphenated_word_id' => $hyphenatedWordId]);
 
         $wordSyllableRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         $selectedSyllableIds = [];
         $selectedSyllablePatterns = [];
 
