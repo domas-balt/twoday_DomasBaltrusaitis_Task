@@ -13,7 +13,6 @@ class SyllableRepository
     public function __construct(
         private readonly PDO $connection
     ){
-
     }
 
     public function loadSyllablesFromFileToDb(string $fileName): void
@@ -41,6 +40,7 @@ class SyllableRepository
     {
         $stmt = $this->connection->query('SELECT * FROM syllables');
         $unfilteredSyllableArrays = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         $filteredSyllables = [];
 
         foreach ($unfilteredSyllableArrays as $unfilteredSyllables) {
@@ -57,6 +57,7 @@ class SyllableRepository
     public function insertSelectedSyllables(array $selectedSyllables): array
     {
         $selectedSyllableIds = [];
+
         $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)");
 
         foreach ($selectedSyllables as $selectedSyllable) {
@@ -65,6 +66,15 @@ class SyllableRepository
         }
 
         return $selectedSyllableIds;
+    }
+
+    public function insertSelectedSyllable($text): int
+    {
+        $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:text)");
+
+        $stmt->execute(['text' => $text]);
+
+        return (int)$this->connection->lastInsertId();
     }
 
     public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
@@ -97,5 +107,24 @@ class SyllableRepository
     {
         $stmt = $this->connection->prepare('DELETE FROM syllables');
         $stmt->execute();
+    }
+
+    /**
+     * @return SelectedSyllable[]
+     */
+    public function getAllSyllablesByIds(array $selectedSyllableIds): array
+    {
+        $selectedSyllables = [];
+        $stmt = $this->connection->prepare("SELECT * FROM selected_syllables WHERE id = (:selected_syllable_ids)");
+
+        foreach ($selectedSyllableIds as $selectedSyllableId) {
+            $stmt->execute(['selected_syllable_ids' => $selectedSyllableId]);
+
+            $selectedSyllableRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $selectedSyllables[] = new SelectedSyllable($selectedSyllableRow['id'], $selectedSyllableRow['text']);
+        }
+
+        return $selectedSyllables;
     }
 }

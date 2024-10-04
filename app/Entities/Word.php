@@ -8,7 +8,7 @@ class Word
 {
     public function __construct(
         private int $id,
-        private string $name
+        private string $text
     ){
     }
 
@@ -17,9 +17,9 @@ class Word
         return $this->id;
     }
 
-    public function getName(): string
+    public function getText(): string
     {
-        return $this->name;
+        return $this->text;
     }
 
     public function setId(int $id): void
@@ -27,8 +27,8 @@ class Word
         $this->id = $id;
     }
 
-    public function setName(string $name): void
+    public function setText(string $text): void
     {
-        $this->name = $name;
+        $this->text = $text;
     }
 }

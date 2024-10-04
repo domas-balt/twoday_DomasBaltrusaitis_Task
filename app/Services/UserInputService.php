@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enumerators\AppType;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
 use http\Exception\InvalidArgumentException;
@@ -54,15 +55,15 @@ readonly class UserInputService
         }
     }
 
-    public function checkUserArgInput(string $hyphenationType): int
+    public function checkUserArgInput(string $applicationType): AppType
     {
-        switch ($hyphenationType) {
+        switch ($applicationType) {
             case "file":
-                return self::APP_TYPE_FILE;
+                return AppType::File;
             case "word":
-                return self::APP_TYPE_WORD;
+                return AppType::Word;
             case "database":
-                return self::APP_TYPE_DATABASE;
+                return AppType::Database;
             default:
                 throw new InvalidArgumentException("The app is ran as depicted here: 'php Main.php file/word textFilePath'.
                  Choose one of the keywords 'file/word/database'.");
