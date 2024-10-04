@@ -51,32 +51,6 @@ class SyllableRepository
         return $filteredSyllables;
     }
 
-    /**
-     * @param Syllable[] $selectedSyllables
-     */
-    public function insertSelectedSyllables(array $selectedSyllables): array
-    {
-        $selectedSyllableIds = [];
-
-        $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)");
-
-        foreach ($selectedSyllables as $selectedSyllable) {
-            $stmt->execute(['selected_syllable_text' => $selectedSyllable->getPattern()]);
-            $selectedSyllableIds[] = $this->connection->lastInsertId();
-        }
-
-        return $selectedSyllableIds;
-    }
-
-    public function insertSelectedSyllable($text): int
-    {
-        $stmt = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:text)");
-
-        $stmt->execute(['text' => $text]);
-
-        return (int)$this->connection->lastInsertId();
-    }
-
     public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
     {
         $stmt = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");

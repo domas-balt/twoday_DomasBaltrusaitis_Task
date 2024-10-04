@@ -16,6 +16,7 @@ use App\Providers\DatabaseWordProvider;
 use App\Providers\FileSyllableProvider;
 use App\Providers\FileWordProvider;
 use App\Repositories\HyphenatedWordRepository;
+use App\Repositories\SelectedSyllableRepository;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
 use App\Services\BasicHyphenationManagementService;
@@ -47,6 +48,7 @@ class Main
         $handler = new LogHandler('/var/app_log.txt');
         $logger = new Logger($handler);
         $wordRepository = new WordRepository($dbConnection);
+        $selectedSyllableRepository = new SelectedSyllableRepository($dbConnection);
         $hyphenatedWordRepository = new HyphenatedWordRepository($dbConnection);
         $syllableRepository = new SyllableRepository($dbConnection);
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
@@ -60,7 +62,7 @@ class Main
         $timer->startTimer();
 
         if ($applicationType === AppType::Database) {
-            $transactionService = new TransactionService($hyphenatedWordRepository, $syllableRepository, $dbConnection);
+            $transactionService = new TransactionService($hyphenatedWordRepository, $syllableRepository, $selectedSyllableRepository, $dbConnection);
             $words = (new DatabaseWordProvider($wordRepository))->getWords();
             $syllables = (new DatabaseSyllableProvider($syllableRepository))->getSyllables();
 
@@ -78,7 +80,7 @@ class Main
                 ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
                 : (new CLIWordProvider($userInputService))->getWords();
 
-            $syllables = $isDbSource === true
+            $syllables = $isDbSource
                 ? (new DatabaseSyllableProvider($syllableRepository))->getSyllables()
                 : (new FileSyllableProvider())->getSyllables();
 
