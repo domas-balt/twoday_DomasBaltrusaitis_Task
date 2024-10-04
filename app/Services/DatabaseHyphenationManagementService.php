@@ -56,15 +56,15 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
             ];
         }
 
-        $hyphenatedWords = $this->paragraphHyphenationService->hyphenateParagraph($wordEntity->getText());
+        $hyphenatedWord = $this->paragraphHyphenationService->hyphenateParagraph($wordEntity->getText());
 
         $syllables = $this->paragraphHyphenationService->getSyllables();
 
-        $data = $this->transactionService->syllableWordInsertTransaction($hyphenatedWords[0], $wordEntity->getId(), $syllables);
+        $data = $this->transactionService->syllableWordInsertTransaction($hyphenatedWord, $wordEntity->getId(), $syllables);
 
         return [
             'syllables' => $data['syllables'],
-            'hyphenated_word' => new HyphenatedWord($data['hyphenatedWordId'], $hyphenatedWords[0], $wordEntity->getId()),
+            'hyphenated_word' => new HyphenatedWord($data['hyphenatedWordId'], $hyphenatedWord, $wordEntity->getId()),
         ];
     }
 

@@ -18,7 +18,7 @@ class ParagraphHyphenationService
         return $this->hyphenationService->getSyllables();
     }
 
-    public function hyphenateParagraph(string $wordLine): array
+    public function hyphenateParagraph(string $wordLine): string
     {
         $splitLine = $this->splitLineByDelimiter($wordLine);
 
@@ -33,9 +33,7 @@ class ParagraphHyphenationService
             $wordsToHyphenate = [];
         }
 
-        $hyphenatedWords[] = implode($splitLine);
-
-        return $hyphenatedWords;
+        return implode($splitLine);
     }
 
     private function splitLineByDelimiter(string $paragraphLine): array

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Entities\SelectedSyllable;
 use App\Entities\Syllable;
 
 class HyphenationService implements HyphenationServiceInterface
@@ -73,7 +74,7 @@ class HyphenationService implements HyphenationServiceInterface
         }
 
         foreach ($this->selectedSyllables as $key => $value) {
-            $this->patternsWithNumbers[$key] = new Syllable($key, $this->syllables[$key]);
+            $this->patternsWithNumbers[$key] = new SelectedSyllable($key, $this->syllables[$key]);
         }
     }
 
@@ -85,7 +86,7 @@ class HyphenationService implements HyphenationServiceInterface
         foreach ($this->selectedSyllables as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->removeNumbersFromString($pattern));
 
-            $fullPatternChars = str_split(str_replace("\n","",$this->patternsWithNumbers[$key]->getPattern()));
+            $fullPatternChars = str_split(str_replace("\n","",$this->patternsWithNumbers[$key]->getText()));
 
             $successfulMatchCount = 0;
             $comparisonBuffer = 0;

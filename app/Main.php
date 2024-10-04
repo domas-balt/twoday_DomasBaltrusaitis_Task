@@ -7,9 +7,6 @@ namespace App;
 require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
-use App\Entities\HyphenatedWord;
-use App\Entities\Syllable;
-use App\Entities\Word;
 use App\Enumerators\AppType;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
@@ -18,21 +15,18 @@ use App\Providers\DatabaseSyllableProvider;
 use App\Providers\DatabaseWordProvider;
 use App\Providers\FileSyllableProvider;
 use App\Providers\FileWordProvider;
-use App\Providers\SyllableProviderInterface;
-use App\Providers\WordProviderInterface;
 use App\Repositories\HyphenatedWordRepository;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
+use App\Services\BasicHyphenationManagementService;
 use App\Services\DatabaseHyphenationManagementService;
 use App\Services\FileService;
 use App\Services\HyphenationService;
 use App\Services\ParagraphHyphenationService;
-use App\Services\RegexHyphenationService;
 use App\Services\ResultVisualizationService;
 use App\Services\TransactionService;
 use App\Services\UserInputService;
 use App\Utilities\Timer;
-use JetBrains\PhpStorm\ArrayShape;
 
 class Main
 {
@@ -59,9 +53,8 @@ class Main
         $resultVisualizationService = new ResultVisualizationService($logger);
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
-//        $userInputService->askAboutDatabaseFileUpdates();
-//        $isDbSource = $userInputService->chooseHyphenationSource();
-        $isDbSource = true;
+        $userInputService->askAboutDatabaseFileUpdates();
+        $isDbSource = $userInputService->chooseHyphenationSource();
 
         $logger->logStartOfApp();
         $timer->startTimer();
@@ -82,81 +75,33 @@ class Main
             $result = $dbHyphenationManagementService->manageHyphenation($words);
         } else {
             $words = $applicationType === AppType::File
-                ? (new FileWordProvider('./var/words.txt'))->getWords()
+                ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
                 : (new CLIWordProvider($userInputService))->getWords();
 
             $syllables = (new FileSyllableProvider())->getSyllables();
 
-            $service = new Service(
-                new ParagraphHyphenationService(new HyphenationService($syllables)),
+            $basicHyphenationManagementService = new BasicHyphenationManagementService(
+                new ParagraphHyphenationService(new HyphenationService($syllables))
             );
 
-            $result = $service->serviceMethod($words);
+            $result = $basicHyphenationManagementService->manageHyphenation($words);
         }
 
         foreach ($result as $data) {
             $resultVisualizationService->visualizeString($data['hyphenated_word']->getText());
 
-            $resultVisualizationService->visualizeSelectedSyllables(
-                $data['syllables'],
-                "These syllables were used in this word's hyphenation",
-            );
-
-            $resultVisualizationService->visualizeString('--------------------');
+            if ($applicationType === AppType::Word)
+            {
+                $resultVisualizationService->visualizeSelectedSyllables($data['syllables']);
+            }
         }
 
         $timer->endTimer();
         $timeSpent = $timer->getTimeSpent();
         $resultVisualizationService->VisualizeString("<< Time spent {$timeSpent} seconds >>\n");
         $logger->logEndOfApp();
-
-
-
-
-//        $syllables = $syllableRepository->getAllSyllablesByHyphenatedWordId($hyphenatedWord->getId());
-//
-//
-//        $finalParagraphLines = $paragraphHyphenationService->hyphenateParagraph();
-//
-//        $resultVisualizationService->visualizeResults($finalParagraphLines,
-//            "[INFO] Printing hyphenated paragraph (Done with str_* based hyphenation algorithm)... \n");
-//        FileService::printDataToFile('/var/nonRegexParagraph.txt', $finalParagraphLines);
-//
-//        if ($applicationType === $userInputService::APP_TYPE_DATABASE) {
-//            $wordRepository->insertManyHyphenatedWords($finalParagraphLines);
-//        }
-//
-//        $finalRegexParagraphLines = $paragraphRegexHyphenationService->hyphenateParagraph();
-//
-//        $resultVisualizationService->visualizeResults($finalRegexParagraphLines,
-//            "[INFO] Printing hyphenated paragraph (Done with regex based hyphenation algorithm)... \n");
-//        FileService::printDataToFile('/var/regexParagraph.txt', $finalRegexParagraphLines);
-
-
-
     }
-
-//    private function getSyllables(bool $isDbSource): array
-//    {
-//        if ($isDbSource) {
-//            return $syllableRepository->getAllSyllables();
-//        }
-//
-//        $syllableFromFile = FileService::readDataFromFile('/var/hyphen.txt');
-//
-//        $syllables = [];
-//
-//        foreach ($syllableFromFile as $key => $syllablePattern) {
-//            $syllables[] = new Syllable($key, $syllablePattern);
-//        }
-//
-//        return $syllables;
-//    }
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'word',
-    2 => '/var/paragraph.txt'
-]);
+$app->run($argv);

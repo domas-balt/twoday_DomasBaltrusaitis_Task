@@ -44,10 +44,8 @@ class ResultVisualizationService
     /**
      * @param SelectedSyllable[] $selectedSyllables
      */
-    public function visualizeSelectedSyllables(array $selectedSyllables, string $infoString): void
+    public function visualizeSelectedSyllables(array $selectedSyllables): void
     {
-        print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
-
         foreach ($selectedSyllables as $selectedSyllable) {
             echo "> {$selectedSyllable->getText()}" . PHP_EOL;
         }
