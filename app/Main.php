@@ -59,7 +59,7 @@ class Main
         $logger->logStartOfApp();
         $timer->startTimer();
 
-        if ($isDbSource) {
+        if ($applicationType === AppType::Database) {
             $transactionService = new TransactionService($hyphenatedWordRepository, $syllableRepository, $dbConnection);
             $words = (new DatabaseWordProvider($wordRepository))->getWords();
             $syllables = (new DatabaseSyllableProvider($syllableRepository))->getSyllables();
@@ -78,7 +78,9 @@ class Main
                 ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
                 : (new CLIWordProvider($userInputService))->getWords();
 
-            $syllables = (new FileSyllableProvider())->getSyllables();
+            $syllables = $isDbSource === true
+                ? (new DatabaseSyllableProvider($syllableRepository))->getSyllables()
+                : (new FileSyllableProvider())->getSyllables();
 
             $basicHyphenationManagementService = new BasicHyphenationManagementService(
                 new ParagraphHyphenationService(new HyphenationService($syllables))

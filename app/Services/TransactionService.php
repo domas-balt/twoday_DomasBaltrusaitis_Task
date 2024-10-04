@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Entities\HyphenatedWord;
-use App\Entities\SelectedSyllable;
-use App\Entities\Syllable;
 use App\Repositories\HyphenatedWordRepository;
 use App\Repositories\SyllableRepository;
-use App\Repositories\WordRepository;
 use JetBrains\PhpStorm\ArrayShape;
 use PDO;
 

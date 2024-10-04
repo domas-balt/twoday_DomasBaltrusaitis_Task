@@ -11,10 +11,6 @@ use http\Exception\InvalidArgumentException;
 
 readonly class UserInputService
 {
-    public const int APP_TYPE_FILE = 1;
-    public const int APP_TYPE_WORD = 2;
-    public const int APP_TYPE_DATABASE = 3;
-
     public function __construct(
         private WordRepository $wordRepository,
         private SyllableRepository $syllableRepository

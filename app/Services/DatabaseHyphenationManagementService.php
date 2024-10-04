@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Entities\HyphenatedWord;
-use App\Entities\Syllable;
-use App\Entities\Word;
 use App\Repositories\HyphenatedWordRepository;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
@@ -67,5 +65,4 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
             'hyphenated_word' => new HyphenatedWord($data['hyphenatedWordId'], $hyphenatedWord, $wordEntity->getId()),
         ];
     }
-
 }
