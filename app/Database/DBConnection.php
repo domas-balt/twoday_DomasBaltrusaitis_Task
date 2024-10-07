@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use PDO;
-
 class DBConnection
 {
-    public static function tryConnect(): ?PDO
+    public static function tryConnect(): ?\PDO
     {
         $host = getenv('MYSQL_HOST');
         $database = getenv('MYSQL_DB');
@@ -17,12 +15,12 @@ class DBConnection
 
         $connectionString = "mysql:host=$host;dbname=$database;charset=UTF8";
 
-        $pdo = new PDO(
+        $pdo = new \PDO(
             $connectionString,
             $user,
             $password,
             [
-                PDO::MYSQL_ATTR_LOCAL_INFILE => true
+                \PDO::MYSQL_ATTR_LOCAL_INFILE => true
             ]
         );
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entities;
 
-class SelectedSyllable
+readonly class SelectedSyllable
 {
     public function __construct(
         private int $id,

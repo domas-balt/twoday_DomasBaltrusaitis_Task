@@ -15,6 +15,6 @@ readonly class FileWordProvider implements WordProviderInterface
 
     public function getWords(): array
     {
-        return  FileService::readDataFromFile($this->filename);
+        return FileService::readDataFromFile($this->filename);
     }
 }

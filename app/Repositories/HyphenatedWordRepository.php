@@ -27,13 +27,13 @@ class HyphenatedWordRepository
         return new HyphenatedWord($result['id'], $result['text'], $result['word_id']);
     }
 
-    public function insertHyphenatedWord(string $word, int $foreignKey): int
+    public function insertHyphenatedWord(string $word, int $wordId): int
     {
-        $hyphenatedWord = $this->findHyphenatedWordById($foreignKey);
+        $hyphenatedWord = $this->findHyphenatedWordById($wordId);
 
         if ($hyphenatedWord == null) {
-            $query = $this->connection->prepare("INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)");
-            $query->execute([$word, $foreignKey]);
+            $query = $this->connection->prepare('INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)');
+            $query->execute([$word, $wordId]);
         }
 
         return (int) ($this->connection->lastInsertId());
@@ -41,7 +41,7 @@ class HyphenatedWordRepository
 
     public function insertHyphenatedWordAndSyllableIds(array $selectedSyllableIds, int $hyphenatedWordId): void
     {
-        if (empty($selectedSyllableIds) || $hyphenatedWordId == null) {
+        if (empty($selectedSyllableIds)) {
             return;
         }
 
@@ -54,7 +54,7 @@ class HyphenatedWordRepository
 
         $placeholders = rtrim(str_repeat('(?, ?), ', count($selectedSyllableIds)), ', ');
 
-        $query = $this->connection->prepare("INSERT INTO selected_Syllables_hyphenated_Words (hyphenated_word_id, selected_syllable_id) VALUES {$placeholders}");
+        $query = $this->connection->prepare("INSERT INTO hyphenated_words_selected_syllables (hyphenated_word_id, selected_syllable_id) VALUES {$placeholders}");
         $query->execute($data);
     }
 }

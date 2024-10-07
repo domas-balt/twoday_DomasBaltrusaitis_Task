@@ -32,9 +32,9 @@ class FileService
         if (is_file($fullPath)) {
             $file = new \SplFileObject($fullPath);
 
-            while ($file->eof() === false) {
-                $envVariable = trim($file->fgets());
-                if($envVariable !== '') {
+            foreach ($file as $row) {
+                $envVariable = trim($row);
+                if ($envVariable !== '') {
                     putenv($envVariable);
                 }
             }

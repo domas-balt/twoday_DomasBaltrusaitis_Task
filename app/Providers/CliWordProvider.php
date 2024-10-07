@@ -7,10 +7,10 @@ namespace App\Providers;
 use App\Entities\Word;
 use App\Services\UserInputService;
 
-class CLIWordProvider implements WordProviderInterface
+readonly class CliWordProvider implements WordProviderInterface
 {
     public function __construct(
-        private readonly UserInputService $userInputService
+        private UserInputService $userInputService
     ) {
     }
 

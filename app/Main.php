@@ -11,7 +11,7 @@ use App\Entities\Word;
 use App\Enumerators\AppType;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
-use App\Providers\CLIWordProvider;
+use App\Providers\CliWordProvider;
 use App\Providers\DatabaseSyllableProvider;
 use App\Providers\DatabaseWordProvider;
 use App\Providers\FileSyllableProvider;
@@ -79,7 +79,7 @@ class Main
         } else {
             $words = $applicationType === AppType::File
                 ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
-                : (new CLIWordProvider($userInputService))->getWords();
+                : (new CliWordProvider($userInputService))->getWords();
 
             $syllables = $isDbSource
                 ? (new DatabaseSyllableProvider($syllableRepository))->getSyllables()
@@ -95,8 +95,7 @@ class Main
         foreach ($result as $data) {
             $resultVisualizationService->visualizeString($data['hyphenated_word']->getText());
 
-            if ($applicationType === AppType::Word)
-            {
+            if ($applicationType === AppType::Word) {
                 $resultVisualizationService->visualizeSelectedSyllables($data['syllables']);
             }
         }
@@ -109,4 +108,8 @@ class Main
 }
 
 $app = new Main();
-$app->run($argv);
+//$app->run($argv);
+$app->run([
+    1 => 'word',
+    2 => '/var/paragraph.txt'
+]);

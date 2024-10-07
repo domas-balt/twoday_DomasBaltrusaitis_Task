@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entities;
 
-class HyphenatedWord
+readonly class HyphenatedWord
 {
     public function __construct(
         private int $id,

@@ -43,20 +43,25 @@ class SyllableRepository
     public function getAllSyllables(): array
     {
         $query = $this->connection->query('SELECT * FROM syllables');
-        $unfilteredSyllableArrays = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $unfilteredSyllables = $query->fetchAll(\PDO::FETCH_ASSOC);
 
         $filteredSyllables = [];
 
-        foreach ($unfilteredSyllableArrays as $unfilteredSyllables) {
-            $filteredSyllables[] = new Syllable($unfilteredSyllables['id'], $unfilteredSyllables['pattern']);
+        foreach ($unfilteredSyllables as $syllables) {
+            $filteredSyllables[] = new Syllable($syllables['id'], $syllables['pattern']);
         }
 
-        return $filteredSyllables; //TODO: Use array_map instead
+        return $filteredSyllables;
+
+//        return array_map(
+//            fn (array $syllable): Syllable => new Syllable($syllable['id'], $syllable['pattern']),
+//            $syllables,
+//        );
     }
 
     public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
     {
-        $query = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");
+        $query = $this->connection->prepare('SELECT * FROM hyphenated_words_selected_syllables WHERE hyphenated_word_id = :hyphenated_word_id');
         $query->execute(['hyphenated_word_id' => $hyphenatedWordId]);
 
         $wordSyllableRows = $query->fetchAll(\PDO::FETCH_ASSOC);
