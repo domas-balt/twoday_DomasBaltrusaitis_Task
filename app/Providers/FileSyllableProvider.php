@@ -24,4 +24,5 @@ class FileSyllableProvider implements SyllableProviderInterface
 
         return $syllables;
     }
+    //TODO: Use Generator here.
 }

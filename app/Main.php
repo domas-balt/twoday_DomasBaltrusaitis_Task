@@ -7,6 +7,7 @@ namespace App;
 require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
+use App\Entities\Word;
 use App\Enumerators\AppType;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
@@ -47,16 +48,17 @@ class Main
         $timer = new Timer();
         $handler = new LogHandler('/var/app_log.txt');
         $logger = new Logger($handler);
-        $wordRepository = new WordRepository($dbConnection);
+        $wordRepository = new WordRepository($dbConnection, $logger);
         $selectedSyllableRepository = new SelectedSyllableRepository($dbConnection);
         $hyphenatedWordRepository = new HyphenatedWordRepository($dbConnection);
-        $syllableRepository = new SyllableRepository($dbConnection);
+        $syllableRepository = new SyllableRepository($dbConnection, $logger);
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
         $resultVisualizationService = new ResultVisualizationService($logger);
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
-        $userInputService->askAboutDatabaseFileUpdates();
-        $isDbSource = $userInputService->chooseHyphenationSource();
+//        $userInputService->askAboutDatabaseFileUpdates();
+//        $isDbSource = $userInputService->chooseHyphenationSource();
+        $isDbSource = true;
 
         $logger->logStartOfApp();
         $timer->startTimer();
@@ -108,4 +110,8 @@ class Main
 }
 
 $app = new Main();
-$app->run($argv);
+//$app->run($argv);
+$app->run([
+    1 => 'database',
+    2 => '/var/paragraph.txt'
+]);

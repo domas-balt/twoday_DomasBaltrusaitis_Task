@@ -6,16 +6,18 @@ namespace App\Repositories;
 
 use App\Entities\SelectedSyllable;
 use App\Entities\Syllable;
-use PDO;
+use App\Logger\Logger;
+use App\Logger\LogLevel;
 
 class SyllableRepository
 {
     public function __construct(
-        private readonly PDO $connection
-    ){
+        private readonly \PDO $connection,
+        private readonly Logger $logger,
+    ) {
     }
 
-    public function loadSyllablesFromFileToDb(string $fileName): void
+    public function loadSyllablesFromFile(string $fileName): void
     {
         $path = dirname(__DIR__) . $fileName;
 
@@ -24,63 +26,54 @@ class SyllableRepository
         }
 
         try {
-            $stmt = $this->connection->prepare(
-                "LOAD DATA LOCAL INFILE :path INTO TABLE syllables
+            if (fopen($path, "r") !== false) {
+                $query = $this->connection->prepare(
+                    "LOAD DATA LOCAL INFILE :path INTO TABLE syllables
                 FIELDS TERMINATED BY ''
                 (pattern)"
-            );
+                );
 
-            $stmt->execute(['path' => $path]);
-        } catch (PDOException $e) {
-            echo $e->getMessage();
+                $query->execute(['path' => $path]);
+            }
+        } catch (\PDOException $e) {
+            $this->logger->log(LogLevel::DEBUG, $e->getMessage());
         }
     }
 
     public function getAllSyllables(): array
     {
-        $stmt = $this->connection->query('SELECT * FROM syllables');
-        $unfilteredSyllableArrays = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $query = $this->connection->query('SELECT * FROM syllables');
+        $unfilteredSyllableArrays = $query->fetchAll(\PDO::FETCH_ASSOC);
 
         $filteredSyllables = [];
 
         foreach ($unfilteredSyllableArrays as $unfilteredSyllables) {
-            $syllable = new Syllable($unfilteredSyllables['id'], $unfilteredSyllables['pattern']);
-            $filteredSyllables[] = $syllable;
+            $filteredSyllables[] = new Syllable($unfilteredSyllables['id'], $unfilteredSyllables['pattern']);
         }
 
-        return $filteredSyllables;
+        return $filteredSyllables; //TODO: Use array_map instead
     }
 
     public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
     {
-        $stmt = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");
-        $stmt->execute(['hyphenated_word_id' => $hyphenatedWordId]);
+        $query = $this->connection->prepare("SELECT * FROM selected_Syllables_hyphenated_Words WHERE hyphenated_word_id = :hyphenated_word_id");
+        $query->execute(['hyphenated_word_id' => $hyphenatedWordId]);
 
-        $wordSyllableRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $wordSyllableRows = $query->fetchAll(\PDO::FETCH_ASSOC);
 
         $selectedSyllableIds = [];
-        $selectedSyllables = [];
 
         foreach ($wordSyllableRows as $syllableRow) {
             $selectedSyllableIds[] = $syllableRow['selected_syllable_id'];
         }
 
-        foreach ($selectedSyllableIds as $selectedSyllableId) {
-            $stmt = $this->connection->prepare("SELECT text FROM selected_syllables WHERE id = (:selected_syllable_id)");
-            $stmt->execute(['selected_syllable_id' => $selectedSyllableId]);
-
-            $selectedPattern = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            $selectedSyllables[] = new SelectedSyllable($selectedSyllableId, $selectedPattern['text']);
-        }
-
-        return $selectedSyllables;
+        return $this->getAllSyllablesByIds($selectedSyllableIds);
     }
 
     public function clearSyllableTable(): void
     {
-        $stmt = $this->connection->prepare('DELETE FROM syllables');
-        $stmt->execute();
+        $query = $this->connection->prepare('DELETE FROM syllables');
+        $query->execute();
     }
 
     /**
@@ -89,14 +82,16 @@ class SyllableRepository
     public function getAllSyllablesByIds(array $selectedSyllableIds): array
     {
         $selectedSyllables = [];
-        $stmt = $this->connection->prepare("SELECT * FROM selected_syllables WHERE id = (:selected_syllable_ids)");
 
-        foreach ($selectedSyllableIds as $selectedSyllableId) {
-            $stmt->execute(['selected_syllable_ids' => $selectedSyllableId]);
+        $placeholders = rtrim(str_repeat('?, ', count($selectedSyllableIds)), ', ');
 
-            $selectedSyllableRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $query = $this->connection->prepare("SELECT * FROM selected_syllables WHERE id IN ({$placeholders})");
+        $query->execute($selectedSyllableIds);
 
-            $selectedSyllables[] = new SelectedSyllable($selectedSyllableRow['id'], $selectedSyllableRow['text']);
+        $result = $query->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($result as $syllable) {
+            $selectedSyllables[] = new SelectedSyllable($syllable['id'], $syllable['text']);
         }
 
         return $selectedSyllables;

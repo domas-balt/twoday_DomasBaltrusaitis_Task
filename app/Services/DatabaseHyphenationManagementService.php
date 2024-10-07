@@ -18,7 +18,7 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
         private WordRepository $wordRepository,
         private SyllableRepository $syllableRepository,
         private HyphenatedWordRepository $hyphenatedWordRepository
-    ){
+    ) {
     }
 
     public function manageHyphenation(array $words): array
@@ -46,6 +46,8 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
             $wordEntity = $this->wordRepository->insertWord($word);
             $hyphenatedWord = null;
         }
+
+        $this->syllableRepository->getAllSyllablesByHyphenatedWordId(57901);
 
         if ($hyphenatedWord !== null) {
             return [

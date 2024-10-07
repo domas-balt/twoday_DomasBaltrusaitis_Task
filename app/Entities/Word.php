@@ -9,7 +9,7 @@ class Word
     public function __construct(
         private int $id,
         private string $text
-    ){
+    ) {
     }
 
     public function getId(): int
@@ -20,15 +20,5 @@ class Word
     public function getText(): string
     {
         return $this->text;
-    }
-
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function setText(string $text): void
-    {
-        $this->text = $text;
     }
 }

@@ -10,7 +10,7 @@ class ParagraphHyphenationService
 
     public function __construct(
         private readonly HyphenationServiceInterface $hyphenationService,
-    ){
+    ) {
     }
 
     public function getSyllables(): array

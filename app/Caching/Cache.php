@@ -15,7 +15,7 @@ class Cache implements CacheInterface
     public function __construct(
         private readonly Memcached $memcached,
         private readonly Logger $logger
-    ){
+    ) {
     }
 
     public function get(string $key, $default = null): mixed

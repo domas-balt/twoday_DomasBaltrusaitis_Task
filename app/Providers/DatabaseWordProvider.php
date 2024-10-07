@@ -10,7 +10,7 @@ class DatabaseWordProvider implements WordProviderInterface
 {
     public function __construct(
         private readonly WordRepository $wordRepository
-    ){
+    ) {
     }
 
     public function getWords(): array

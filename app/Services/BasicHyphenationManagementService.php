@@ -11,7 +11,7 @@ readonly class BasicHyphenationManagementService implements HyphenationManagemen
 {
     public function __construct(
         private ParagraphHyphenationService $paragraphHyphenationService
-    ){
+    ) {
     }
 
     public function manageHyphenation(array $words): array

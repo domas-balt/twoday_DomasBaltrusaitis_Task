@@ -10,7 +10,7 @@ class HyphenatedWord
         private int $id,
         private string $text,
         private int $wordId
-    ){
+    ) {
     }
 
     public function getId(): int
@@ -21,25 +21,5 @@ class HyphenatedWord
     public function getText(): string
     {
         return $this->text;
-    }
-
-    public function getWordId(): int
-    {
-        return $this->wordId;
-    }
-
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function setText(string $text): void
-    {
-        $this->text = $text;
-    }
-
-    public function setWordId(int $wordId): void
-    {
-        $this->wordId = $wordId;
     }
 }

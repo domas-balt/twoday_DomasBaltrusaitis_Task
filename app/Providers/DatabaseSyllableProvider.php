@@ -11,7 +11,7 @@ class DatabaseSyllableProvider implements SyllableProviderInterface
 {
     public function __construct(
         private readonly SyllableRepository $syllableRepository
-    ){
+    ) {
     }
 
     /**

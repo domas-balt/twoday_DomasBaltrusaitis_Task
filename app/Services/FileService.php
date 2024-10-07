@@ -29,15 +29,12 @@ class FileService
     {
         $fullPath = self::getFullPath($fileName);
 
-        if (is_file($fullPath))
-        {
+        if (is_file($fullPath)) {
             $file = new \SplFileObject($fullPath);
 
-            while ($file->eof() === false)
-            {
+            while ($file->eof() === false) {
                 $envVariable = trim($file->fgets());
-                if($envVariable !== "")
-                {
+                if($envVariable !== '') {
                     putenv($envVariable);
                 }
             }

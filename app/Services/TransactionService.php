@@ -17,7 +17,7 @@ readonly class TransactionService
         private SyllableRepository $syllableRepository,
         private SelectedSyllableRepository $selectedSyllableRepository,
         private PDO $connection
-    ){
+    ) {
     }
 
     #[ArrayShape([
@@ -45,6 +45,7 @@ readonly class TransactionService
             ];
         } catch (\Exception $e) {
             $this->connection->rollBack();
+
             throw new \PDOException($e->getMessage());
         }
     }

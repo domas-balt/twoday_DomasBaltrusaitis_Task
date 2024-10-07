@@ -12,16 +12,16 @@ use App\Logger\LogLevel;
 
 class ResultVisualizationService
 {
-    private const string DEFAULT_SEPARATOR = "/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/";
+    private const string SEPARATOR = "/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/";
 
     public function __construct(
         private readonly Logger $logger,
-    ){
+    ) {
     }
 
     public function visualizeResults(array $hyphenatedResults, string $infoString): void
     {
-        print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
+        print(self::SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::SEPARATOR . PHP_EOL);
 
         foreach ($hyphenatedResults as $result) {
             $this->logger->log(LogLevel::INFO, "Hyphenated word <{$result}>");
@@ -34,7 +34,7 @@ class ResultVisualizationService
      */
     public function visualizeSyllables(array $syllables, string $infoString): void
     {
-        print(self::DEFAULT_SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::DEFAULT_SEPARATOR . PHP_EOL);
+        print(self::SEPARATOR . PHP_EOL . $infoString . PHP_EOL . self::SEPARATOR . PHP_EOL);
 
         foreach ($syllables as $syllable) {
             echo "> {$syllable->getPattern()}" . PHP_EOL;

@@ -14,7 +14,7 @@ readonly class UserInputService
     public function __construct(
         private WordRepository $wordRepository,
         private SyllableRepository $syllableRepository
-    ){
+    ) {
     }
 
     public function askAboutDatabaseFileUpdates(): void
@@ -89,7 +89,7 @@ readonly class UserInputService
             case 2:
                 echo "Input filename (eg. /var/hyphen.txt):" . PHP_EOL;
                 $this->syllableRepository->clearSyllableTable();
-                $this->syllableRepository->loadSyllablesFromFileToDb(readline());
+                $this->syllableRepository->loadSyllablesFromFile(readline());
 
                 break;
             default:

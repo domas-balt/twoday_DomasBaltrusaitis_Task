@@ -11,13 +11,11 @@ class CLIWordProvider implements WordProviderInterface
 {
     public function __construct(
         private readonly UserInputService $userInputService
-    ){
+    ) {
     }
 
     public function getWords(): array
     {
-        $words[] = $this->userInputService->readWordToHyphenate();
-
-        return $words;
+        return [$this->userInputService->readWordToHyphenate()];
     }
 }

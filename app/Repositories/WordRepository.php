@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Entities\HyphenatedWord;
 use App\Entities\Word;
-use PDO;
-use PDOException;
+use App\Logger\Logger;
+use App\Logger\LogLevel;
 
 class WordRepository
 {
     public function __construct(
-        private readonly PDO $connection
-    ){
+        private readonly \PDO $connection,
+        private readonly Logger $logger
+    ) {
     }
 
     public function uploadWordsFromFile(string $fileName): void
@@ -25,15 +25,19 @@ class WordRepository
         }
 
         try {
-            $stmt = $this->connection->prepare(
-                "LOAD DATA LOCAL INFILE :path INTO TABLE words
+            if (fopen($path, "r") !== false) {
+                $query = $this->connection->prepare(
+                    "LOAD DATA LOCAL INFILE :path INTO TABLE syllables
                 FIELDS TERMINATED BY ''
-                (text)"
-            );
+                (pattern)"
+                );
 
-            $stmt->execute(['path' => $path]);
-        } catch (PDOException $e) {
-            echo $e->getMessage();
+                $query->execute(['path' => $path]);
+            }
+
+            $query->execute(['path' => $path]);
+        } catch (\PDOException $e) {
+            $this->logger->log(LogLevel::DEBUG, $e->getMessage());
         }
     }
 
@@ -41,10 +45,10 @@ class WordRepository
     {
         $words = [];
 
-        $stmt = $this->connection->prepare("SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL");
-        $stmt->execute();
+        $query = $this->connection->prepare("SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL");
+        $query->execute();
 
-        $wordRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $wordRows = $query->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($wordRows as $wordRow) {
             $words[$wordRow['id']] = $wordRow['text'];
@@ -55,41 +59,41 @@ class WordRepository
 
     public function insertWord(string $word): Word
     {
-        $stmt = $this->connection->prepare("INSERT INTO words (text) VALUES (:words_text)");
-        $stmt->execute(['words_text' => $word]);
+        $query = $this->connection->prepare("INSERT INTO words (text) VALUES (:words_text)");
+        $query->execute(['words_text' => $word]);
 
         $id = $this->connection->lastInsertId();
 
-        return new Word((int)$id, $word);
+        return new Word((int) $id, $word);
     }
 
     public function checkIfWordExistsDb(string $word): bool
     {
-        $stmt = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
-        $stmt->execute(['text' => $word]);
+        $query = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
+        $query->execute(['text' => $word]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
 
         return !empty($result);
     }
 
     public function findWordByText(string $text): ?Word
     {
-        $stmt = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
-        $stmt->execute(['text' => $text]);
+        $query = $this->connection->prepare("SELECT * FROM words WHERE text = :text");
+        $query->execute(['text' => $text]);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
 
         if ($result === false) {
             return null;
         }
 
-        return new Word((int)$result['id'], $result['text']);
+        return new Word((int) $result['id'], $result['text']);
     }
 
     public function clearWordTable(): void
     {
-        $stmt = $this->connection->prepare('DELETE FROM words');
-        $stmt->execute();
+        $query = $this->connection->prepare('DELETE FROM words');
+        $query->execute();
     }
 }

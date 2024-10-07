@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Entities\Syllable;
 use http\Exception\InvalidArgumentException;
 
-class RegexHyphenationService implements HyphenationServiceInterface
+readonly class RegexHyphenationService implements HyphenationServiceInterface
 {
     private array $syllables;
 
