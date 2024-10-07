@@ -56,9 +56,8 @@ class Main
         $resultVisualizationService = new ResultVisualizationService($logger);
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
-//        $userInputService->askAboutDatabaseFileUpdates();
-//        $isDbSource = $userInputService->chooseHyphenationSource();
-        $isDbSource = true;
+        $userInputService->askAboutDatabaseFileUpdates();
+        $isDbSource = $userInputService->chooseHyphenationSource();
 
         $logger->logStartOfApp();
         $timer->startTimer();
@@ -110,8 +109,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'database',
-    2 => '/var/paragraph.txt'
-]);
+$app->run($argv);

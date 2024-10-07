@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Entities\HyphenatedWord;
+use App\Entities\Word;
 use App\Repositories\HyphenatedWordRepository;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
@@ -21,12 +22,15 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
     ) {
     }
 
+    /**
+     * @param Word[] $words
+     */
     public function manageHyphenation(array $words): array
     {
         $result = [];
 
         foreach ($words as $word) {
-            $result[] = $this->hyphenateAndSaveWord($word);
+            $result[] = $this->hyphenateAndSaveWord($word->getText());
         }
 
         return $result;
@@ -46,8 +50,6 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
             $wordEntity = $this->wordRepository->insertWord($word);
             $hyphenatedWord = null;
         }
-
-        $this->syllableRepository->getAllSyllablesByHyphenatedWordId(57901);
 
         if ($hyphenatedWord !== null) {
             return [
