@@ -27,10 +27,26 @@ class WordRepository
         $wordRows = $query->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($wordRows as $wordRow) {
-            $words[$wordRow['id']] = $wordRow['text'];
+            $words[] = new Word($wordRow['id'], $wordRow['text']);
         }
 
         return $words;
+    }
+
+    public function deleteWord($wordId): int
+    {
+        $query = $this->connection->prepare("DELETE FROM words WHERE id = ?");
+        $query->execute([$wordId]);
+
+        return $query->rowCount();
+    }
+
+    public function updateWord(int $id, string $text): int
+    {
+        $query = $this->connection->prepare("UPDATE words SET text = :text WHERE id = :id");
+        $query->execute(['text' => $text, 'id' => $id]);
+
+        return $query->rowCount();
     }
 
     public function insertWord(string $word): Word
@@ -55,14 +71,18 @@ class WordRepository
         $query->execute($words);
     }
 
-    public function checkIfWordExistsDb(string $word): bool
+    public function getWordById(int $id): ?Word
     {
-        $query = $this->connection->prepare('SELECT * FROM words WHERE text = :text');
-        $query->execute(['text' => $word]);
+        $query = $this->connection->prepare("SELECT * FROM words WHERE id = :id");
+        $query->execute(['id' => $id]);
 
         $result = $query->fetch(\PDO::FETCH_ASSOC);
 
-        return !empty($result);
+        if ($result === false) {
+            return null;
+        }
+
+        return new Word($result['id'], $result['text']);
     }
 
     public function findWordByText(string $text): ?Word
