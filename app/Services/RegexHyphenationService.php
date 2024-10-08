@@ -4,11 +4,26 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Entities\Syllable;
+use http\Exception\InvalidArgumentException;
+
 readonly class RegexHyphenationService implements HyphenationServiceInterface
 {
-    public function __construct(
-        private array $syllables,
-    ){
+    private array $syllables;
+
+    /**
+     * @param Syllable[] $syllables
+     */
+    public function __construct(array $syllables)
+    {
+        foreach ($syllables as $syllable) {
+            $this->syllables[] = $syllable->getPattern();
+        }
+    }
+
+    public function getSyllables(): array
+    {
+        Throw new InvalidArgumentException('Regex service cannot return syllables.');
     }
 
     public function hyphenateWords(array $words): array

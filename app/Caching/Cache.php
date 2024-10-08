@@ -6,16 +6,15 @@ namespace App\Caching;
 
 use App\Logger\Logger;
 use App\Logger\LogLevel;
-use Memcached;
 
 class Cache implements CacheInterface
 {
     private const int DEFAULT_TTL_SECONDS = 600;
 
     public function __construct(
-        private readonly Memcached $memcached,
+        private readonly \Memcached $memcached,
         private readonly Logger $logger
-    ){
+    ) {
     }
 
     public function get(string $key, $default = null): mixed

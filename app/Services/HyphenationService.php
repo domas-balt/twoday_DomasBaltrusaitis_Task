@@ -4,22 +4,37 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Entities\SelectedSyllable;
+use App\Entities\Syllable;
+
 class HyphenationService implements HyphenationServiceInterface
 {
     private array $doubledIndexWords = [];
     private array $selectedSyllables = [];
     private array $finalWords = [];
+    private array $patternsWithNumbers = [];
+    private array $syllables;
 
-    public function __construct(
-        private readonly array $syllables
-    ){
+    /**
+     * @param Syllable[] $syllables
+     */
+    public function __construct(array $syllables)
+    {
+        foreach ($syllables as $syllable) {
+            $this->syllables[] = $syllable->getPattern();
+        }
+    }
+
+    public function getSyllables(): array
+    {
+        return $this->patternsWithNumbers;
     }
 
     public function hyphenateWords(array $words): array
     {
         foreach ($words as $key => $word) {
-            $patternsWithNumbers = $this->findUsableSyllables($word);
-            $word = $this->findSyllablePositionsInWord($word, $patternsWithNumbers);
+            $this->findUsableSyllables($word);
+            $word = $this->findSyllablePositionsInWord($word);
             $this->mergeSyllablesAndWordPositionArrays($word);
             $finalProcessedWord = $this->addHyphensAndWhitespaces();
 
@@ -31,10 +46,9 @@ class HyphenationService implements HyphenationServiceInterface
         return $words;
     }
 
-    private function findUsableSyllables(string $word): array
+    private function findUsableSyllables(string $word): void
     {
         $arrayWithoutNumbers = $this->FilterOutNumbersFromArray($this->syllables);
-        $patternsWithNumbers = [];
 
         foreach ($arrayWithoutNumbers as $key => $syllable) {
             if (
@@ -60,20 +74,19 @@ class HyphenationService implements HyphenationServiceInterface
         }
 
         foreach ($this->selectedSyllables as $key => $value) {
-            $patternsWithNumbers[$key] = $this->syllables[$key];
+            $this->patternsWithNumbers[$key] = new SelectedSyllable($key, $this->syllables[$key]);
         }
-
-        return $patternsWithNumbers;
     }
 
-    private function findSyllablePositionsInWord(string $word, array $patternsWithNumbers): string
+    private function findSyllablePositionsInWord(string $word): string
     {
         $word = ".{$word}.";
         $wordChars = str_split($word);
 
         foreach ($this->selectedSyllables as $key => $pattern) {
             $patternWithoutNumbers = str_split($this->removeNumbersFromString($pattern));
-            $fullPatternChars = str_split(str_replace("\n","",$patternsWithNumbers[$key]));
+
+            $fullPatternChars = str_split(str_replace("\n","",$this->patternsWithNumbers[$key]->getText()));
 
             $successfulMatchCount = 0;
             $comparisonBuffer = 0;

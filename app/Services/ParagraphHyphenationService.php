@@ -8,34 +8,32 @@ class ParagraphHyphenationService
 {
     private const array DELIMITERS = [',','.','!','?','"',"'",'-','–',"\n",' '];
 
-    private array $hyphenatedLines = [];
-
     public function __construct(
-        private readonly array $paragraphLines,
         private readonly HyphenationServiceInterface $hyphenationService,
-    ){
+    ) {
     }
 
-    public function hyphenateParagraph(): array
+    public function getSyllables(): array
     {
-        foreach ($this->paragraphLines as $key => $paragraphLine) {
-            $splitLine = $this->splitLineByDelimiter($paragraphLine);
+        return $this->hyphenationService->getSyllables();
+    }
 
-            foreach ($splitLine as $wordKey => $value) {
-                if ($this->isDelimiter($value)) {
-                    continue;
-                }
+    public function hyphenateParagraph(string $wordLine): string
+    {
+        $splitLine = $this->splitLineByDelimiter($wordLine);
 
-                $wordsToHyphenate[] = $value;
-                $hyphenatedWord = $this->hyphenationService->hyphenateWords($wordsToHyphenate);
-                $splitLine[$wordKey] = $hyphenatedWord[0];
-                $wordsToHyphenate = [];
+        foreach ($splitLine as $wordKey => $value) {
+            if ($this->isDelimiter($value)) {
+                continue;
             }
 
-            $this->hyphenatedLines[$key] = implode($splitLine);
+            $wordsToHyphenate[] = $value;
+            $hyphenatedWord = $this->hyphenationService->hyphenateWords($wordsToHyphenate);
+            $splitLine[$wordKey] = $hyphenatedWord[0];
+            $wordsToHyphenate = [];
         }
 
-        return $this->hyphenatedLines;
+        return implode($splitLine);
     }
 
     private function splitLineByDelimiter(string $paragraphLine): array

@@ -7,4 +7,5 @@ namespace App\Services;
 interface HyphenationServiceInterface
 {
     public function hyphenateWords(array $words): array;
+    public function getSyllables(): array;
 }
