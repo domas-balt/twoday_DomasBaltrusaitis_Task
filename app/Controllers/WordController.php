@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Entities\Word;
+use App\Exception\NotFoundException;
+use App\Exception\UnprocessableEntityException;
+use App\Helpers\HttpResponseCodes;
 use App\Repositories\WordRepository;
 
-readonly class WordController
+readonly class WordController implements ControllerInterface
 {
     public function __construct(
         private \PDO $dbConnection,
@@ -17,7 +19,12 @@ readonly class WordController
     ) {
     }
 
-    public function processRequest(): void
+    public function list(): Response
+    {
+        return new Response();
+    }
+
+    public function processRequest(): array
     {
         switch ($this->requestMethod) {
             case 'GET':
@@ -40,15 +47,12 @@ readonly class WordController
 
                 break;
             default:
-                $response = $this->notFoundResponse();
-
-                break;
+                throw new NotFoundException('Not Found');
         }
 
         header($response['status_code_header']);
-        if ($response['body']) {
-            echo $response['body'];
-        }
+
+        return $response;
     }
 
     public function getAllWords(): array
@@ -64,7 +68,7 @@ readonly class WordController
     {
         $wordEntity = $this->wordRepository->getWordById($wordId);
         if($wordEntity === null) {
-            return $this->notFoundResponse();
+            throw new NotFoundException('Not Found');
         }
 
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
@@ -76,8 +80,8 @@ readonly class WordController
     {
         $input = (array) json_decode(file_get_contents("php://input", true));
 
-        if (!isset($input['text'])) {
-            return $this->notFoundResponse();
+        if (empty($input['text'])) {
+            throw new UnprocessableEntityException('Unprocessable Entity');
         }
 
         $this->wordRepository->insertWord($input['text']);
@@ -92,16 +96,15 @@ readonly class WordController
     {
         $wordEntity = $this->wordRepository->getWordById($id);
         if ($wordEntity === null) {
-            return $this->notFoundResponse();
+            throw new NotFoundException('Not Found');
         }
 
         $input = (array) json_decode(file_get_contents("php://input", true));
 
         if (
             !isset($input['text'])
-            || !isset($input['id'])
         ) {
-            $this->unprocessableEntityResponse();
+            throw new UnprocessableEntityException('Unprocessable Entity');
         }
 
         $this->wordRepository->updateWord($id, $input['text']);
@@ -115,30 +118,12 @@ readonly class WordController
     {
         $wordEntity = $this->wordRepository->getWordById($id);
         if ($wordEntity === null) {
-            return $this->notFoundResponse();
+            throw new NotFoundException('Not Found');
         }
 
         $this->wordRepository->deleteWord($id);
         $response['status_code_header'] = 'HTTP/1.1 200 OK';
         $response['body'] = null;
-
-        return $response;
-    }
-
-    private function notFoundResponse(): array
-    {
-        $response['status_code_header'] = 'HTTP/1.1 404 Not Found';
-        $response['body'] = null;
-
-        return $response;
-    }
-
-    private function unprocessableEntityResponse(): array
-    {
-        $response['status_code_header'] = 'HTTP/1.1 422 Unprocessable Entity';
-        $response['body'] = json_encode([
-            'error' => 'Invalid input'
-        ]);
 
         return $response;
     }

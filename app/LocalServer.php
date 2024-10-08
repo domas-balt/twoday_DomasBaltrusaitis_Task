@@ -8,9 +8,14 @@ require_once 'Autoloader.php';
 
 use App\Controllers\WordController;
 use App\Database\DBConnection;
+use App\Enumerators\RouteEntityType;
+use App\Exception\HttpException;
+use App\Exception\InternalServerErrorException;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
+use App\Logger\LogLevel;
 use App\Repositories\WordRepository;
+use App\Routes\RouteManager;
 use App\Services\FileService;
 
 header("Content-Type: application/json; charset=UTF-8");
@@ -31,23 +36,42 @@ class LocalServer
         $wordRepository = new WordRepository($dbConnection, $logger);
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $uri = explode('/', $uri);
 
-        if ($uri[1] !== 'words') {
-            header("HTTP/1.1 404 Not Found");
-            exit();
+        $parts = explode('/', $uri);
+
+        foreach ($parts as $part) {
+            $part = ltrim($part, "%7B");
+            $part = rtrim($part, "%7D");
+            $logger->log(LogLevel::INFO, $part);
         }
+        $uri  = implode('/', $parts);
 
-        $wordId = null;
+        //TODO: ISSIEXTRACTINK IS URL PARAMETRUS IR ENDPOINTA PIRMA ig. KAIP NUSPREST AR PARAMETRAS? GALI EIT PVZ PARAMETRAI TARP {} skliaustu ARBA po klaustuko
+        // Pacheckinsi ar prasideda su bracketais, jei jo - tai yra parametras, jei ne - endpointas.
+        $routeManager = new RouteManager();
 
-        if (isset($uri[2])) {
-            $wordId = (int) $uri[2];
-        }
+        $callback = $routeManager->processRequest($uri, 'GET');
+
+//        $entityType = $routeManager->checkRouteValidity();
+//        $entityId = $routeManager->getRouteEntityId();
 
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-        $wordController = new WordController($dbConnection, $requestMethod, $wordId, $wordRepository);
-        $wordController->processRequest();
+//        switch ($entityType->value) {
+//            case RouteEntityType::WORDS->value:
+//                $entityController = new WordController($dbConnection, $requestMethod, $entityId, $wordRepository);
+//                break;
+//
+//        }
+
+//        try {
+//            $response = $callback();
+//
+//            echo $response['body'];
+//        } catch (HttpException $exception) {
+//            header($exception->getResponseHeader());
+//            echo json_encode($exception->getMessage());
+//        }
     }
 }
 

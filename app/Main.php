@@ -8,6 +8,7 @@ require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
 use App\Enumerators\AppType;
+use App\Exception\NotFoundException;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
 use App\Providers\CliWordProvider;
@@ -61,7 +62,7 @@ class Main
         $logger->logStartOfApp();
         $timer->startTimer();
 
-        if ($applicationType === AppType::Database) {
+        if ($applicationType === AppType::DATABASE) {
             $transactionService = new TransactionService($hyphenatedWordRepository, $syllableRepository, $selectedSyllableRepository, $dbConnection);
             $words = (new DatabaseWordProvider($wordRepository))->getWords();
             $syllables = (new DatabaseSyllableProvider($syllableRepository))->getSyllables();
@@ -76,7 +77,7 @@ class Main
 
             $result = $dbHyphenationManagementService->manageHyphenation($words);
         } else {
-            $words = $applicationType === AppType::File
+            $words = $applicationType === AppType::FILE
                 ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
                 : (new CliWordProvider($userInputService))->getWords();
 
@@ -94,7 +95,7 @@ class Main
         foreach ($result as $data) {
             $resultVisualizationService->visualizeString($data['hyphenated_word']->getText());
 
-            if ($applicationType === AppType::Word) {
+            if ($applicationType === AppType::WORD) {
                 $resultVisualizationService->visualizeSelectedSyllables($data['syllables']);
             }
         }

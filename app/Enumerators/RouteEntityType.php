@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enumerators;
 
-enum AppType
+enum RouteEntityType: string
 {
-    case FILE;
-    case WORD;
-    case DATABASE;
+    case WORDS = 'words';
 }
-
