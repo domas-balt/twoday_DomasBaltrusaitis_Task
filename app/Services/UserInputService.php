@@ -19,8 +19,8 @@ readonly class UserInputService
 
     public function askAboutDatabaseFileUpdates(): void
     {
-        echo "Would you like to upload a new file which would change the existing files in the database?" .
-            PHP_EOL . "<< Enter [Y/y] for approval or any other button if you don't want to. >>" . PHP_EOL;
+        echo 'Would you like to upload a new file which would change the existing files in the database?' .
+            PHP_EOL . '<< Enter [Y/y] for approval or any other button to skip this step. >>' . PHP_EOL;
 
         $userInput = readline();
 
@@ -30,7 +30,7 @@ readonly class UserInputService
 
                 break;
             default:
-                echo PHP_EOL . "Continuing..." . PHP_EOL;
+                echo PHP_EOL . 'Continuing...' . PHP_EOL;
 
                 break;
         }
@@ -38,8 +38,8 @@ readonly class UserInputService
 
     public function chooseHyphenationSource(): bool
     {
-        echo "Would you like the program to use the Database as it's source?" .
-            PHP_EOL . "<< Enter [Y/y] for approval or any other button to use local files as the source." . PHP_EOL;
+        echo 'Would you like the program to use the Database as the source?' .
+            PHP_EOL . '<< Enter [Y/y] for approval or any other button to use local files as the source.' . PHP_EOL;
 
         $userInput = readline();
 
@@ -54,11 +54,11 @@ readonly class UserInputService
     public function checkUserArgInput(string $applicationType): AppType
     {
         switch ($applicationType) {
-            case "file":
+            case 'file':
                 return AppType::File;
-            case "word":
+            case 'word':
                 return AppType::Word;
-            case "database":
+            case 'database':
                 return AppType::Database;
             default:
                 throw new InvalidArgumentException("The app is ran as depicted here: 'php Main.php file/word textFilePath'.
@@ -68,32 +68,32 @@ readonly class UserInputService
 
     public function readWordToHyphenate(): string
     {
-        echo "Enter the word that you want to hyphenate:" . PHP_EOL;
+        echo 'Enter the word that you want to hyphenate:' . PHP_EOL;
         return readline();
     }
 
     private function askFilenameAndTable(): void
     {
-        echo "Which table would you like to update?" .
-            PHP_EOL . "<< Enter [1] for the Words table | Enter [2] for the Syllables table >>" . PHP_EOL;
+        echo 'Which table would you like to update?' .
+            PHP_EOL . '<< Enter [1] for the Words table | Enter [2] for the Syllables table >>' . PHP_EOL;
 
         $userInput = readline();
 
         switch ($userInput) {
             case 1:
-                echo "Input filename (eg. /var/words.txt):" . PHP_EOL;
+                echo 'Input filename (eg. /var/words.txt):' . PHP_EOL;
                 $this->wordRepository->clearWordTable();
                 $this->wordRepository->uploadWordsFromFile(readline());
 
                 break;
             case 2:
-                echo "Input filename (eg. /var/hyphen.txt):" . PHP_EOL;
+                echo 'Input filename (eg. /var/hyphen.txt):' . PHP_EOL;
                 $this->syllableRepository->clearSyllableTable();
                 $this->syllableRepository->loadSyllablesFromFile(readline());
 
                 break;
             default:
-                echo PHP_EOL . "Unknown input. Continuing without database updates..." . PHP_EOL;
+                echo PHP_EOL . 'Unknown input. Continuing without database updates...' . PHP_EOL;
 
                 break;
         }

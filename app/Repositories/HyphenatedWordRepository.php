@@ -15,7 +15,7 @@ class HyphenatedWordRepository
 
     public function findHyphenatedWordById(int $foreignKey): ?HyphenatedWord
     {
-        $query = $this->connection->prepare("SELECT * FROM hyphenated_words WHERE word_id = :word_id");
+        $query = $this->connection->prepare('SELECT * FROM hyphenated_words WHERE word_id = :word_id');
         $query->execute(['word_id' => $foreignKey]);
 
         $result = $query->fetch(\PDO::FETCH_ASSOC);

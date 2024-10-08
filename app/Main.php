@@ -7,7 +7,6 @@ namespace App;
 require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
-use App\Entities\Word;
 use App\Enumerators\AppType;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
@@ -34,7 +33,7 @@ class Main
 {
     public function run(array $argv = []): void
     {
-        if (count($argv) <= 1 || !is_string($argv[2]) || !file_exists(__DIR__ . $argv[2])) {
+        if (count($argv) <= 1 || !isset($argv[2]) || !file_exists(__DIR__ . $argv[2])) {
             throw new \Exception(\InvalidArgumentException::class);
         }
 
@@ -108,8 +107,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'word',
-    2 => '/var/paragraph.txt'
-]);
+$app->run($argv);

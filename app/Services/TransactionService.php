@@ -8,7 +8,6 @@ use App\Repositories\HyphenatedWordRepository;
 use App\Repositories\SelectedSyllableRepository;
 use App\Repositories\SyllableRepository;
 use JetBrains\PhpStorm\ArrayShape;
-use PDO;
 
 readonly class TransactionService
 {
@@ -16,7 +15,7 @@ readonly class TransactionService
         private HyphenatedWordRepository $hyphenatedWordRepository,
         private SyllableRepository $syllableRepository,
         private SelectedSyllableRepository $selectedSyllableRepository,
-        private PDO $connection
+        private \PDO $connection
     ) {
     }
 
@@ -46,7 +45,7 @@ readonly class TransactionService
         } catch (\Exception $e) {
             $this->connection->rollBack();
 
-            throw new \PDOException($e->getMessage());
+            throw $e;
         }
     }
 }

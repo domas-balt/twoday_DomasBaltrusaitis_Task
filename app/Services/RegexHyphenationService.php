@@ -23,7 +23,7 @@ readonly class RegexHyphenationService implements HyphenationServiceInterface
 
     public function getSyllables(): array
     {
-        Throw new InvalidArgumentException("Regex service cannot return syllables.");
+        Throw new InvalidArgumentException('Regex service cannot return syllables.');
     }
 
     public function hyphenateWords(array $words): array

@@ -20,7 +20,7 @@ readonly class SelectedSyllableRepository
     {
         $selectedSyllableIds = [];
 
-        $query = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)");
+        $query = $this->connection->prepare('INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)');
 
         foreach ($selectedSyllables as $selectedSyllable) {
             $query->execute(['selected_syllable_text' => $selectedSyllable->getText()]);
@@ -30,9 +30,9 @@ readonly class SelectedSyllableRepository
         return $selectedSyllableIds;
     }
 
-    public function insertSelectedSyllable($text): int
+    public function insertSelectedSyllable(string $text): int
     {
-        $query = $this->connection->prepare("INSERT INTO selected_syllables (text) VALUES (:text)");
+        $query = $this->connection->prepare('INSERT INTO selected_syllables (text) VALUES (:text)');
 
         $query->execute(['text' => $text]);
 

@@ -14,7 +14,10 @@ readonly class BasicHyphenationManagementService implements HyphenationManagemen
     ) {
     }
 
-    public function manageHyphenation(array $words): array
+    #[ArrayShape([
+        'hyphenated_word' => 'App\Entities\HyphenatedWord',
+        'syllables' => 'App\Entities\SelectedSyllable[]',
+    ])] public function manageHyphenation(array $words): array
     {
         $result = [];
 

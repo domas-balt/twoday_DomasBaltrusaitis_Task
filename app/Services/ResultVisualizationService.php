@@ -12,7 +12,7 @@ use App\Logger\LogLevel;
 
 class ResultVisualizationService
 {
-    private const string SEPARATOR = "/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/";
+    private const string SEPARATOR = '/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/';
 
     public function __construct(
         private readonly Logger $logger,

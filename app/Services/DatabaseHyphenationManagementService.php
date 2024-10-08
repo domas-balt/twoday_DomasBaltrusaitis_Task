@@ -22,15 +22,16 @@ readonly class DatabaseHyphenationManagementService implements HyphenationManage
     ) {
     }
 
-    /**
-     * @param Word[] $words
-     */
+    #[ArrayShape([
+        'hyphenated_word' => 'App\Entities\HyphenatedWord',
+        'syllables' => 'App\Entities\SelectedSyllable[]',
+    ])]
     public function manageHyphenation(array $words): array
     {
         $result = [];
 
         foreach ($words as $word) {
-            $result[] = $this->hyphenateAndSaveWord($word->getText());
+            $result[] = $this->hyphenateAndSaveWord($word);
         }
 
         return $result;

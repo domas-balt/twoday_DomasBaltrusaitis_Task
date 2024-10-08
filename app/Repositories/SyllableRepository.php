@@ -8,6 +8,7 @@ use App\Entities\SelectedSyllable;
 use App\Entities\Syllable;
 use App\Logger\Logger;
 use App\Logger\LogLevel;
+use App\Services\FileService;
 
 class SyllableRepository
 {
@@ -25,16 +26,10 @@ class SyllableRepository
             throw new \InvalidArgumentException("File not found with path {$path} and file name {$fileName}!");
         }
 
-        try {
-            if (fopen($path, "r") !== false) {
-                $query = $this->connection->prepare(
-                    "LOAD DATA LOCAL INFILE :path INTO TABLE syllables
-                FIELDS TERMINATED BY ''
-                (pattern)"
-                );
+        $syllables = FileService::readDataFromFile($fileName);
 
-                $query->execute(['path' => $path]);
-            }
+        try {
+            $this->insertManySyllables($syllables);
         } catch (\PDOException $e) {
             $this->logger->log(LogLevel::DEBUG, $e->getMessage());
         }
@@ -43,20 +38,24 @@ class SyllableRepository
     public function getAllSyllables(): array
     {
         $query = $this->connection->query('SELECT * FROM syllables');
-        $unfilteredSyllables = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $syllables = $query->fetchAll(\PDO::FETCH_ASSOC);
 
-        $filteredSyllables = [];
+        return array_map(
+            fn (array $syllable): Syllable => new Syllable($syllable['id'], $syllable['pattern']),
+            $syllables,
+        );
+    }
 
-        foreach ($unfilteredSyllables as $syllables) {
-            $filteredSyllables[] = new Syllable($syllables['id'], $syllables['pattern']);
+    public function insertManySyllables(array $syllables): void
+    {
+        if (empty($syllables)) {
+            return;
         }
 
-        return $filteredSyllables;
+        $placeholders = rtrim(str_repeat('(?), ', count($syllables)), ', ');
 
-//        return array_map(
-//            fn (array $syllable): Syllable => new Syllable($syllable['id'], $syllable['pattern']),
-//            $syllables,
-//        );
+        $query = $this->connection->prepare("INSERT INTO syllables (pattern) VALUES {$placeholders}");
+        $query->execute($syllables);
     }
 
     public function getAllSyllablesByHyphenatedWordId(int $hyphenatedWordId): array
@@ -86,8 +85,6 @@ class SyllableRepository
      */
     public function getAllSyllablesByIds(array $selectedSyllableIds): array
     {
-        $selectedSyllables = [];
-
         $placeholders = rtrim(str_repeat('?, ', count($selectedSyllableIds)), ', ');
 
         $query = $this->connection->prepare("SELECT * FROM selected_syllables WHERE id IN ({$placeholders})");
@@ -95,10 +92,9 @@ class SyllableRepository
 
         $result = $query->fetchAll(\PDO::FETCH_ASSOC);
 
-        foreach ($result as $syllable) {
-            $selectedSyllables[] = new SelectedSyllable($syllable['id'], $syllable['text']);
-        }
-
-        return $selectedSyllables;
+        return array_map(
+            fn (array $syllable): SelectedSyllable => new SelectedSyllable($syllable['id'], $syllable['text']),
+            $result,
+        );
     }
 }
