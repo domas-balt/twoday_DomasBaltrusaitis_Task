@@ -17,23 +17,6 @@ class WordRepository
     ) {
     }
 
-    public function uploadWordsFromFile(string $fileName): void
-    {
-        $path = dirname(__DIR__) . $fileName;
-
-        if (!file_exists($path)) {
-            throw new \InvalidArgumentException("File not found with path {$path} and file name {$fileName}!");
-        }
-
-        $words = FileService::readDataFromFile($fileName);
-
-        try {
-            $this->insertManyWords($words);
-        } catch (\PDOException $e) {
-            $this->logger->log(LogLevel::DEBUG, $e->getMessage());
-        }
-    }
-
     public function getAllWords(): array
     {
         $words = [];

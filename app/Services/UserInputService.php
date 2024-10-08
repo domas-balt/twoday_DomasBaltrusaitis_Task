@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enumerators\AppType;
+use App\Logger\LogLevel;
 use App\Repositories\SyllableRepository;
 use App\Repositories\WordRepository;
 use http\Exception\InvalidArgumentException;
@@ -83,13 +84,13 @@ readonly class UserInputService
             case 1:
                 echo 'Input filename (eg. /var/words.txt):' . PHP_EOL;
                 $this->wordRepository->clearWordTable();
-                $this->wordRepository->uploadWordsFromFile(readline());
+                $this->uploadWordsFromFile(readline());
 
                 break;
             case 2:
                 echo 'Input filename (eg. /var/hyphen.txt):' . PHP_EOL;
                 $this->syllableRepository->clearSyllableTable();
-                $this->syllableRepository->loadSyllablesFromFile(readline());
+                $this->loadSyllablesFromFile(readline());
 
                 break;
             default:
@@ -97,5 +98,31 @@ readonly class UserInputService
 
                 break;
         }
+    }
+
+    private function loadSyllablesFromFile(string $fileName): void
+    {
+        $path = dirname(__DIR__) . $fileName;
+
+        if (!file_exists($path)) {
+            throw new \InvalidArgumentException("File not found with path {$path} and file name {$fileName}!");
+        }
+
+        $syllables = FileService::readDataFromFile($fileName);
+
+        $this->syllableRepository->insertManySyllables($syllables);
+    }
+
+    private function uploadWordsFromFile(string $fileName): void
+    {
+        $path = dirname(__DIR__) . $fileName;
+
+        if (!file_exists($path)) {
+            throw new \InvalidArgumentException("File not found with path {$path} and file name {$fileName}!");
+        }
+
+        $words = FileService::readDataFromFile($fileName);
+
+        $this->wordRepository->insertManyWords($words);
     }
 }

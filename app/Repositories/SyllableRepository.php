@@ -18,23 +18,6 @@ class SyllableRepository
     ) {
     }
 
-    public function loadSyllablesFromFile(string $fileName): void
-    {
-        $path = dirname(__DIR__) . $fileName;
-
-        if (!file_exists($path)) {
-            throw new \InvalidArgumentException("File not found with path {$path} and file name {$fileName}!");
-        }
-
-        $syllables = FileService::readDataFromFile($fileName);
-
-        try {
-            $this->insertManySyllables($syllables);
-        } catch (\PDOException $e) {
-            $this->logger->log(LogLevel::DEBUG, $e->getMessage());
-        }
-    }
-
     public function getAllSyllables(): array
     {
         $query = $this->connection->query('SELECT * FROM syllables');
