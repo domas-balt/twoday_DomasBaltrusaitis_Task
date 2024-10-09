@@ -36,7 +36,7 @@ readonly class WordController implements ControllerInterface
 
     public function create(): Response
     {
-        $input = (array) json_decode(file_get_contents("php://input", true));
+        $input = (array) json_decode(file_get_contents('php://input', true));
 
         if (empty($input['text'])) {
             throw new UnprocessableEntityException('Unprocessable Entity');
@@ -54,7 +54,7 @@ readonly class WordController implements ControllerInterface
             throw new NotFoundException('Not Found');
         }
 
-        $input = (array) json_decode(file_get_contents("php://input", true));
+        $input = (array) json_decode(file_get_contents('php://input', true));
 
         if (
             !isset($input['text'])
