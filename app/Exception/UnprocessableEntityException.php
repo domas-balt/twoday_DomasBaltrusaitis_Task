@@ -8,7 +8,7 @@ use App\Enumerators\ResponseCode;
 
 class UnprocessableEntityException extends HttpException
 {
-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(string $message = 'Unprocessable entity', int $code = 0, \Throwable $previous = null)
     {
         parent::__construct(ResponseCode::UNPROCESSABLE_ENTITY, $message, $code, $previous);
     }

@@ -4,40 +4,29 @@ declare(strict_types=1);
 
 namespace App\Routes;
 
-use App\Controllers\WordController;
 use App\Entities\Response;
 use App\Exception\NotFoundException;
-use App\Repositories\WordRepository;
 
 readonly class RouteManager
 {
-    /** @var Route[] $routes */
-    private array $routes;
-
+    /** @param Route[] $routes */
     public function __construct(
-        private WordRepository $wordRepository,
+        private array $routes
     ) {
-        $wordController = new WordController($wordRepository);
-
-        $this->routes = [
-            new Route('GET', '/words', $wordController, 'getAll'),
-            new Route('GET', '/words/{id}', $wordController, 'getById'),
-            new Route('POST', '/words', $wordController, 'create'),
-            new Route('PUT', '/words/{id}', $wordController, 'update'),
-            new Route('DELETE', '/words/{id}', $wordController, 'delete'),
-        ];
     }
 
     public function processRequest(string $uri, string $method): Response
     {
         foreach ($this->routes as $route) {
-            if ($route->matchesWithParameters($method, $uri)) {
-                $parameters = $this->extractParameters($uri);
-
-                $callback = $route->getActionCallback();
-
-                return call_user_func($callback, ...$parameters);
+            if (!$route->matches($method, $uri)) {
+                continue;
             }
+
+            $parameters = $this->extractParameters($uri);
+
+            $callback = $route->getActionCallback();
+
+            return call_user_func($callback, ...$parameters);
         }
 
         throw new NotFoundException('Not found route');
@@ -46,6 +35,13 @@ readonly class RouteManager
     private function extractParameters(string $uri): array
     {
         preg_match('/\d+/', $uri, $matches);
+
+        $parts = parse_url($uri);
+
+        if (!empty($parts['query'])) {
+            parse_str($parts['query'], $query);
+            $matches = array_merge($matches, $query);
+        }
 
         return $matches;
     }

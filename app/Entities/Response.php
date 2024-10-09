@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Entities;
 
+use App\Enumerators\ResponseCode;
+
 readonly class Response
 {
     public function __construct(
-        private string $statusCodeHeader,
+        private ResponseCode $responseCode,
         private ?string $body,
     ) {
     }
 
-    public function getStatusCodeHeader(): string
+    public function getResponseCode(): int
     {
-        return $this->statusCodeHeader;
+        return $this->responseCode->value;
     }
 
     public function getBody(): ?string

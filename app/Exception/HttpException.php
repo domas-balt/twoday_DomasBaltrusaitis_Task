@@ -17,8 +17,8 @@ class HttpException extends \Exception
         parent::__construct($message, $responseCode->value, $previous);
     }
 
-    public function getResponseHeader(): string
+    public function getResponseCode(): int
     {
-        return 'HTTP/1.1 ' . $this->responseCode->value . ' ' . $this->message;
+        return $this->responseCode->value;
     }
 }

@@ -8,7 +8,7 @@ use App\Enumerators\ResponseCode;
 
 class NotFoundException extends HttpException
 {
-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(string $message = 'Not found', int $code = 0, \Throwable $previous = null)
     {
         parent::__construct(ResponseCode::NOT_FOUND, $message, $code, $previous);
     }

@@ -10,7 +10,7 @@ use App\Logger\Logger;
 readonly class WordRepository
 {
     public function __construct(
-        private \PDO   $connection,
+        private \PDO $connection,
         private Logger $logger
     ) {
     }

@@ -6,15 +6,16 @@ namespace App;
 
 require_once 'Autoloader.php';
 
+use App\Controllers\WordController;
 use App\Database\DBConnection;
+use App\Enumerators\HttpMethods;
 use App\Exception\HttpException;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
 use App\Repositories\WordRepository;
+use App\Routes\Route;
 use App\Routes\RouteManager;
 use App\Services\FileService;
-
-header("Content-Type: application/json; charset=UTF-8");
 
 class LocalServer
 {
@@ -33,14 +34,28 @@ class LocalServer
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        $routeManager = new RouteManager($wordRepository);
+        $wordController = new WordController($wordRepository);
+
+        $wordRoutes = [
+            new Route(HttpMethods::GET, '/words', $wordController, 'getAll'),
+            new Route(HttpMethods::GET, '/words/{id}', $wordController, 'getById'),
+            new Route(HttpMethods::POST, '/words', $wordController, 'create'),
+            new Route(HttpMethods::PUT, '/words/{id}', $wordController, 'update'),
+            new Route(HttpMethods::DELETE, '/words/{id}', $wordController, 'delete'),
+        ];
+
+        $routeManager = new RouteManager($wordRoutes);
 
         try {
+            header("Content-Type: application/json; charset=UTF-8");
+
             $response = $routeManager->processRequest($uri, $_SERVER['REQUEST_METHOD']);
-            header($response->getStatusCodeHeader());
+            http_response_code($response->getResponseCode());
+
             echo $response->getBody();
         } catch (HttpException $exception) {
-            header($exception->getResponseHeader());
+            http_response_code($exception->getResponseCode());
+
             echo json_encode($exception->getMessage());
         }
     }
