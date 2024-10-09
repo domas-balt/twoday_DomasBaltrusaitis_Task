@@ -22,7 +22,6 @@ final readonly class Route
     public function matchesWithParameters(string $method, string $uri): bool
     {
         $regexPattern = preg_replace('/\{[a-zA-Z_]+\}/', '(\d+)', $this->route);
-
         $regexPattern = preg_replace('/\//', '\/', $regexPattern);
 
         if(preg_match('/^' . $regexPattern . '$/', $uri) && $method === $this->method) {

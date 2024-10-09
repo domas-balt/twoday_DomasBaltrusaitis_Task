@@ -37,7 +37,6 @@ class LocalServer
 
         try {
             $response = $routeManager->processRequest($uri, $_SERVER['REQUEST_METHOD']);
-
             header($response->getStatusCodeHeader());
             echo $response->getBody();
         } catch (HttpException $exception) {
