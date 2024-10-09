@@ -5,33 +5,35 @@ declare(strict_types=1);
 namespace App\Routes;
 
 use App\Controllers\WordController;
-use App\Enumerators\RouteEntityType;
-use App\Exception\InternalServerErrorException;
+use App\Entities\Response;
 use App\Exception\NotFoundException;
+use App\Repositories\WordRepository;
 
 readonly class RouteManager
 {
-    /** @var Route[]  */
+    /** @var Route[] $routes */
     private array $routes;
 
     public function __construct(
-//        private array $uri
+        private WordRepository $wordRepository,
     ) {
-        $wordController = new WordController();
+        $wordController = new WordController($wordRepository);
 
         $this->routes = [
-            new Route('GET', '/words', $wordController, 'list'),
-            new Route('GET', '/words/{id}', $wordController, 'get'),
+            new Route('GET', '/words', $wordController, 'getAll'),
+            new Route('GET', '/words/{id}', $wordController, 'getById'),
+            new Route('POST', '/words', $wordController, 'create'),
+            new Route('PUT', '/words/{id}', $wordController, 'update'),
+            new Route('DELETE', '/words/{id}', $wordController, 'delete'),
         ];
     }
 
     public function processRequest(string $uri, string $method): Response
     {
-        $endpoint = '/words'; // TODO: Extract from uri
-        $parameters = [1]; // TODO: Extract from uri
-
         foreach ($this->routes as $route) {
-            if ($route->matches($endpoint, $method)) {
+            if ($route->matchesWithParameters($method, $uri)) {
+                $parameters = $this->extractParameters($uri);
+
                 $callback = $route->getActionCallback();
 
                 return call_user_func($callback, ...$parameters);
@@ -39,5 +41,12 @@ readonly class RouteManager
         }
 
         throw new NotFoundException('Not found route');
+    }
+
+    private function extractParameters(string $uri): array
+    {
+        preg_match('/\d+/', $uri, $matches);
+
+        return $matches;
     }
 }

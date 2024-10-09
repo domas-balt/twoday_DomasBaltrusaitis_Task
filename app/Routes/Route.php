@@ -7,8 +7,8 @@ use App\Controllers\ControllerInterface;
 final readonly class Route
 {
     public function __construct(
-        private string $route,
         private string $method,
+        private string $route,
         private ControllerInterface $controller,
         private string $action
     ) {
@@ -19,8 +19,16 @@ final readonly class Route
         return [$this->controller, $this->action];
     }
 
-    public function matches(string $endpoint, string $method): bool
+    public function matchesWithParameters(string $method, string $uri): bool
     {
-        return $this->route === $endpoint && $this->method === $method;
+        $regexPattern = preg_replace('/\{[a-zA-Z_]+\}/', '(\d+)', $this->route);
+
+        $regexPattern = preg_replace('/\//', '\/', $regexPattern);
+
+        if(preg_match('/^' . $regexPattern . '$/', $uri) && $method === $this->method) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -6,14 +6,12 @@ namespace App\Repositories;
 
 use App\Entities\Word;
 use App\Logger\Logger;
-use App\Logger\LogLevel;
-use App\Services\FileService;
 
-class WordRepository
+readonly class WordRepository
 {
     public function __construct(
-        private readonly \PDO $connection,
-        private readonly Logger $logger
+        private \PDO   $connection,
+        private Logger $logger
     ) {
     }
 

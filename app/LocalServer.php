@@ -6,14 +6,10 @@ namespace App;
 
 require_once 'Autoloader.php';
 
-use App\Controllers\WordController;
 use App\Database\DBConnection;
-use App\Enumerators\RouteEntityType;
 use App\Exception\HttpException;
-use App\Exception\InternalServerErrorException;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
-use App\Logger\LogLevel;
 use App\Repositories\WordRepository;
 use App\Routes\RouteManager;
 use App\Services\FileService;
@@ -37,41 +33,17 @@ class LocalServer
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        $parts = explode('/', $uri);
+        $routeManager = new RouteManager($wordRepository);
 
-        foreach ($parts as $part) {
-            $part = ltrim($part, "%7B");
-            $part = rtrim($part, "%7D");
-            $logger->log(LogLevel::INFO, $part);
+        $response = $routeManager->processRequest($uri, $_SERVER['REQUEST_METHOD']);
+
+        try {
+            header($response->getStatusCodeHeader());
+            echo $response->getBody();
+        } catch (HttpException $exception) {
+            header($exception->getResponseHeader());
+            echo json_encode($exception->getMessage());
         }
-        $uri  = implode('/', $parts);
-
-        //TODO: ISSIEXTRACTINK IS URL PARAMETRUS IR ENDPOINTA PIRMA ig. KAIP NUSPREST AR PARAMETRAS? GALI EIT PVZ PARAMETRAI TARP {} skliaustu ARBA po klaustuko
-        // Pacheckinsi ar prasideda su bracketais, jei jo - tai yra parametras, jei ne - endpointas.
-        $routeManager = new RouteManager();
-
-        $callback = $routeManager->processRequest($uri, 'GET');
-
-//        $entityType = $routeManager->checkRouteValidity();
-//        $entityId = $routeManager->getRouteEntityId();
-
-        $requestMethod = $_SERVER['REQUEST_METHOD'];
-
-//        switch ($entityType->value) {
-//            case RouteEntityType::WORDS->value:
-//                $entityController = new WordController($dbConnection, $requestMethod, $entityId, $wordRepository);
-//                break;
-//
-//        }
-
-//        try {
-//            $response = $callback();
-//
-//            echo $response['body'];
-//        } catch (HttpException $exception) {
-//            header($exception->getResponseHeader());
-//            echo json_encode($exception->getMessage());
-//        }
     }
 }
 
