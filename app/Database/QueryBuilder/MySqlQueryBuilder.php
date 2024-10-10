@@ -1,0 +1,136 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Database\QueryBuilder;
+
+use App\Entities\Query;
+
+class MySqlQueryBuilder implements SqlQueryBuilder
+{
+    protected Query $query;
+
+    public function reset(): void
+    {
+        $this->query = new Query();
+    }
+
+    public function select(string $table, array $fields): SqlQueryBuilder
+    {
+        $this->reset();
+        $this->query->setBase('SELECT ' . implode(', ', $fields) . ' FROM ' . $table);
+        $this->query->setType('SELECT');
+
+        return $this;
+    }
+
+    public function insert(string $table, array $fields): SqlQueryBuilder
+    {
+        $this->reset();
+
+        $fields = implode(', ', $fields);
+
+        if (!empty($fields)) {
+            $fields = ' (' . $fields . ')';
+        }
+
+        $this->query->setBase('INSERT INTO ' . $table .  $fields);
+        $this->query->setType('INSERT');
+
+        return $this;
+    }
+
+    public function where(string $field, string $value, string $operator = '='): SqlQueryBuilder
+    {
+        if (!in_array($this->query->getType(), ['SELECT', 'UPDATE', 'DELETE'])) {
+            throw new \Exception('Where clause can only be added to SELECT, UPDATE, DELETE');
+        }
+
+        switch ($value) {
+            case str_starts_with($value, ':'):
+                $this->query->setWhere("$field $operator $value");
+
+                break;
+            case str_contains(strtoupper($value), 'IS NULL') || str_contains(strtoupper($value), 'IS NOT NULL'):
+                $this->query->setWhere("$field $value");
+
+                break;
+            default:
+                $this->query->setWhere("$field $operator '$value'");
+        }
+
+        return $this;
+    }
+
+    public function values(array $values): SqlQueryBuilder
+    {
+        if ($this->query->getType() != 'INSERT') {
+            throw new \Exception(<<<EOT
+            Values can currently only be added alongside the
+            INSERT statement and do not function as a standalone statement.'
+            EOT);
+        }
+
+        $this->query->setValues($values);
+
+        return $this;
+    }
+
+    public function delete(string $table): SqlQueryBuilder
+    {
+        $this->reset();
+        $this->query->setBase('DELETE FROM ' . $table);
+        $this->query->setType('DELETE');
+
+        return $this;
+    }
+
+    public function update(string $table, array $fields): SqlQueryBuilder
+    {
+        $this->reset();
+
+        foreach ($fields as $key => $field) {
+            $fields[$key] =  $field . ' = ' . ':' . $field;
+        }
+
+        $this->query->setBase('UPDATE ' . $table . ' SET ' . implode(', ', $fields));
+        $this->query->setType('UPDATE');
+
+        return $this;
+    }
+
+    public function leftJoin(string $table, string $join): SqlQueryBuilder
+    {
+        if ($this->query->getType() != 'SELECT') {
+            throw new \Exception('Left-join clause can only be added to SELECT');
+        }
+
+        $this->query->setLeftJoin($table . ' ON ' . $join);
+//        $query = $this->connection->prepare('SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL');
+        return $this;
+    }
+
+    public function getSql(): string
+    {
+        $query = $this->query;
+        $sql = $query->getBase();
+
+        if (!empty($this->query->getLeftJoin()))
+        {
+            $sql .= ' LEFT JOIN ' . $this->query->getLeftJoin();
+        }
+
+        if (!empty($this->query->getWhere())) {
+            $sql .= ' WHERE ' . implode(' AND ', $this->query->getWhere());
+        }
+
+        if (!empty($this->query->getValues())) {
+            $sql .= ' VALUES ' . implode(', ', $this->query->getValues());
+        }
+
+
+        $sql .= ';';
+
+        return $sql;
+    }
+}

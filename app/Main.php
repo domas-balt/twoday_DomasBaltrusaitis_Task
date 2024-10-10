@@ -7,6 +7,8 @@ namespace App;
 require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
+use App\Database\QueryBuilder\MySqlQueryBuilder;
+use App\Database\QueryBuilder\SqlQueryBuilder;
 use App\Enumerators\AppType;
 use App\Exception\NotFoundException;
 use App\Logger\Handler\LogHandler;
@@ -43,8 +45,23 @@ class Main
         $loader->addNamespace('App', __DIR__);
 
         FileService::readEnvFile('/var/.env');
-
+        // ---------------
         $dbConnection = DBConnection::tryConnect();
+
+        $queryBuilder = new MySqlQueryBuilder();
+
+        $query = $queryBuilder
+            ->select('words', ['words.text, words.id'])
+            ->leftJoin('hyphenationdb.hyphenated_words hw', 'words.id = hw.word_id')
+            ->where('hw.word_id', 'IS NULL')
+            ->getSql();
+
+        $query = $dbConnection->prepare($query);
+        $query->execute();
+        $wordRows = $query->fetchAll(\PDO::FETCH_ASSOC);
+
+        echo $wordRows;
+        // -----------------
         $timer = new Timer();
         $handler = new LogHandler('/var/app_log.txt');
         $logger = new Logger($handler);
@@ -108,4 +125,8 @@ class Main
 }
 
 $app = new Main();
-$app->run($argv);
+//$app->run($argv);
+$app->run([
+    1 => 'word',
+    2 => '/var/paragraph.txt',
+]);
