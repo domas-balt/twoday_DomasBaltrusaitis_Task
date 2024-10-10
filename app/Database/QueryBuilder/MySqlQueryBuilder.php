@@ -106,7 +106,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         }
 
         $this->query->setLeftJoin($table . ' ON ' . $join);
-//        $query = $this->connection->prepare('SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL');
+
         return $this;
     }
 
@@ -115,8 +115,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         $query = $this->query;
         $sql = $query->getBase();
 
-        if (!empty($this->query->getLeftJoin()))
-        {
+        if (!empty($this->query->getLeftJoin())) {
             $sql .= ' LEFT JOIN ' . $this->query->getLeftJoin();
         }
 
@@ -127,7 +126,6 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         if (!empty($this->query->getValues())) {
             $sql .= ' VALUES ' . implode(', ', $this->query->getValues());
         }
-
 
         $sql .= ';';
 
