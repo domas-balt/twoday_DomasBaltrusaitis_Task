@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Database\QueryBuilder;
 
 use App\Entities\Query;
+use App\Enumerators\SqlStatement;
 
 class MySqlQueryBuilder implements SqlQueryBuilder
 {
@@ -19,7 +20,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
     {
         $this->reset();
         $this->query->setBase('SELECT ' . implode(', ', $fields) . ' FROM ' . $table);
-        $this->query->setType('SELECT');
+        $this->query->setType(SqlStatement::SELECT);
 
         return $this;
     }
@@ -35,7 +36,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         }
 
         $this->query->setBase('INSERT INTO ' . $table .  $fields);
-        $this->query->setType('INSERT');
+        $this->query->setType(SqlStatement::INSERT);
 
         return $this;
     }
@@ -84,7 +85,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
     {
         $this->reset();
         $this->query->setBase('DELETE FROM ' . $table);
-        $this->query->setType('DELETE');
+        $this->query->setType(SqlStatement::DELETE);
 
         return $this;
     }
@@ -98,7 +99,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         }
 
         $this->query->setBase('UPDATE ' . $table . ' SET ' . implode(', ', $fields));
-        $this->query->setType('UPDATE');
+        $this->query->setType(SqlStatement::UPDATE);
 
         return $this;
     }

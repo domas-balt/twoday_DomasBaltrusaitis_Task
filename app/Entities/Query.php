@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Entities;
 
+use App\Enumerators\SqlStatement;
+
 class Query
 {
     private string $base;
-    private string $type;
+    private ?SqlStatement $type;
     private array $where;
     private array $values;
     private string $leftJoin;
@@ -15,7 +17,7 @@ class Query
     public function __construct()
     {
         $this->base = '';
-        $this->type = '';
+        $this->type = null;
         $this->leftJoin = '';
         $this->where = [];
         $this->values = [];
@@ -28,7 +30,7 @@ class Query
 
     public function getType(): string
     {
-        return $this->type;
+        return $this->type->value;
     }
 
     public function getWhere(): array
@@ -51,7 +53,7 @@ class Query
         $this->base = $base;
     }
 
-    public function setType(string $type): void
+    public function setType(SqlStatement $type): void
     {
         $this->type = $type;
     }

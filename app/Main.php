@@ -50,26 +50,16 @@ class Main
         $handler = new LogHandler('/var/app_log.txt');
         $logger = new Logger($handler);
         $mySqlQueryBuilder = new MySqlQueryBuilder();
-
-
-        $placeholders = rtrim(str_repeat('(?, ?), ', 20), ', ');
-
-        $queryString = $mySqlQueryBuilder
-            ->insert('hyphenated_words_selected_syllables', ['hyphenated_word_id', 'selected_syllable_id'])
-            ->values([$placeholders])
-            ->getSql();
-
         $wordRepository = new WordRepository($mySqlQueryBuilder, $dbConnection, $logger);
-        $selectedSyllableRepository = new SelectedSyllableRepository($dbConnection);
-        $hyphenatedWordRepository = new HyphenatedWordRepository($dbConnection);
-        $syllableRepository = new SyllableRepository($dbConnection, $logger);
+        $selectedSyllableRepository = new SelectedSyllableRepository($mySqlQueryBuilder, $dbConnection);
+        $hyphenatedWordRepository = new HyphenatedWordRepository($mySqlQueryBuilder, $dbConnection);
+        $syllableRepository = new SyllableRepository($mySqlQueryBuilder, $dbConnection, $logger);
         $userInputService = new UserInputService($wordRepository, $syllableRepository);
         $resultVisualizationService = new ResultVisualizationService($logger);
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
-//        $userInputService->askAboutDatabaseFileUpdates();
-//        $isDbSource = $userInputService->chooseHyphenationSource();
-        $isDbSource = true;
+        $userInputService->askAboutDatabaseFileUpdates();
+        $isDbSource = $userInputService->chooseHyphenationSource();
 
         $logger->logStartOfApp();
         $timer->startTimer();
@@ -120,8 +110,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'database',
-    2 => '/var/paragraph.txt',
-]);
+$app->run($argv);
