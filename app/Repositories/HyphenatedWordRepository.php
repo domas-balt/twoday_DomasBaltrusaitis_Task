@@ -4,18 +4,25 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Database\QueryBuilder\SqlQueryBuilder;
 use App\Entities\HyphenatedWord;
 
 class HyphenatedWordRepository
 {
     public function __construct(
+        private SqlQueryBuilder $sqlQueryBuilder,
         private readonly \PDO $connection
     ) {
     }
 
     public function findHyphenatedWordById(int $foreignKey): ?HyphenatedWord
     {
-        $query = $this->connection->prepare('SELECT * FROM hyphenated_words WHERE word_id = :word_id');
+        $queryString = $this->sqlQueryBuilder
+            ->select('hyphenated_words', ['*'])
+            ->where('word_id', ':word_id')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute(['word_id' => $foreignKey]);
 
         $result = $query->fetch(\PDO::FETCH_ASSOC);
@@ -32,8 +39,13 @@ class HyphenatedWordRepository
         $hyphenatedWord = $this->findHyphenatedWordById($wordId);
 
         if ($hyphenatedWord == null) {
-            $query = $this->connection->prepare('INSERT INTO hyphenated_words (text, word_id) VALUES (?,?)');
-            $query->execute([$word, $wordId]);
+            $queryString = $this->sqlQueryBuilder
+                ->insert('hyphenated_words', ['text', 'word_id'])
+                ->values(['(?, ?)'])
+                ->getSql();
+
+            $query = $this->connection->prepare($queryString);
+            $query->execute([$wordId, $wordId]);
         }
 
         return (int) ($this->connection->lastInsertId());
@@ -54,7 +66,12 @@ class HyphenatedWordRepository
 
         $placeholders = rtrim(str_repeat('(?, ?), ', count($selectedSyllableIds)), ', ');
 
-        $query = $this->connection->prepare("INSERT INTO hyphenated_words_selected_syllables (hyphenated_word_id, selected_syllable_id) VALUES {$placeholders}");
+        $queryString = $this->sqlQueryBuilder
+            ->insert('hyphenated_words_selected_syllables', ['hyphenated_word_id', 'selected_syllable_id'])
+            ->values([$placeholders])
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute($data);
     }
 }

@@ -11,7 +11,7 @@ readonly class RouteManager
 {
     /** @param Route[] $routes */
     public function __construct(
-        private array $routes
+        private array $routes,
     ) {
     }
 

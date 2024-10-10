@@ -12,5 +12,4 @@ class UnprocessableEntityException extends HttpException
     {
         parent::__construct(ResponseCode::UNPROCESSABLE_ENTITY, $message, $code, $previous);
     }
-
 }

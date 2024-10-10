@@ -24,7 +24,7 @@ readonly class WordRepository
         $queryString = $this->sqlQueryBuilder
             ->select('words', ['words.text, words.id'])
             ->leftJoin('hyphenationdb.hyphenated_words hw', 'words.id = hw.word_id')
-            ->where('hw.word_id', 'IS NULL')
+            ->where('hw.word_id', '', 'IS NULL')
             ->getSql();
 
         $query = $this->connection->prepare($queryString);

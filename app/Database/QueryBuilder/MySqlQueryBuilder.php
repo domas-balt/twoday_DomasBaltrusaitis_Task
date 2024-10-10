@@ -47,12 +47,16 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         }
 
         switch ($value) {
-            case str_starts_with($value, ':') || str_contains($value, '?'):
+            case str_starts_with($value, ':') || $value === '?':
                 $this->query->setWhere("$field $operator $value");
 
                 break;
-            case str_contains(strtoupper($value), 'IS NULL') || str_contains(strtoupper($value), 'IS NOT NULL'):
-                $this->query->setWhere("$field $value");
+            case $operator == 'IS NULL' || $operator == 'IS NOT NULL':
+                $this->query->setWhere("$field $operator");
+
+                break;
+            case $operator == 'IN':
+                $this->query->setWhere("$field $operator ($value)");
 
                 break;
             default:

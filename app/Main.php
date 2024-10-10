@@ -52,11 +52,11 @@ class Main
         $mySqlQueryBuilder = new MySqlQueryBuilder();
 
 
-        $placeholders = rtrim(str_repeat('(?), ', 30), ', ');
+        $placeholders = rtrim(str_repeat('(?, ?), ', 20), ', ');
 
         $queryString = $mySqlQueryBuilder
-            ->select('words', ['*'])
-            ->where('id', ':id')
+            ->insert('hyphenated_words_selected_syllables', ['hyphenated_word_id', 'selected_syllable_id'])
+            ->values([$placeholders])
             ->getSql();
 
         $wordRepository = new WordRepository($mySqlQueryBuilder, $dbConnection, $logger);
