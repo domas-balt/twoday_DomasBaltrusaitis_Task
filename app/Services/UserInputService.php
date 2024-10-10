@@ -60,7 +60,7 @@ readonly class UserInputService
             case 'word':
                 return AppType::WORD;
             case 'database':
-                return AppType::Database;
+                return AppType::DATABASE;
             default:
                 throw new InvalidArgumentException("The app is ran as depicted here: 'php Main.php file/word textFilePath'.
                  Choose one of the keywords 'file/word/database'.");

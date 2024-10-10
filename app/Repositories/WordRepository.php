@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Database\QueryBuilder\SqlQueryBuilder;
 use App\Entities\Word;
 use App\Logger\Logger;
 
 readonly class WordRepository
 {
     public function __construct(
+        private SqlQueryBuilder $sqlQueryBuilder,
         private \PDO $connection,
         private Logger $logger
     ) {
@@ -19,7 +21,13 @@ readonly class WordRepository
     {
         $words = [];
 
-        $query = $this->connection->prepare('SELECT words.text, words.id FROM words LEFT JOIN hyphenationdb.hyphenated_words hw on words.id = hw.word_id WHERE hw.word_id IS NULL');
+        $queryString = $this->sqlQueryBuilder
+            ->select('words', ['words.text, words.id'])
+            ->leftJoin('hyphenationdb.hyphenated_words hw', 'words.id = hw.word_id')
+            ->where('hw.word_id', 'IS NULL')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute();
 
         $wordRows = $query->fetchAll(\PDO::FETCH_ASSOC);
@@ -33,7 +41,12 @@ readonly class WordRepository
 
     public function deleteWord($wordId): int
     {
-        $query = $this->connection->prepare("DELETE FROM words WHERE id = ?");
+        $queryString = $this->sqlQueryBuilder
+            ->delete('words')
+            ->where('id', '?')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute([$wordId]);
 
         return $query->rowCount();
@@ -41,7 +54,12 @@ readonly class WordRepository
 
     public function updateWord(int $id, string $text): int
     {
-        $query = $this->connection->prepare("UPDATE words SET text = :text WHERE id = :id");
+        $queryString = $this->sqlQueryBuilder
+            ->update('words', ['text'])
+            ->where('id', ':id')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute(['text' => $text, 'id' => $id]);
 
         return $query->rowCount();
@@ -49,7 +67,12 @@ readonly class WordRepository
 
     public function insertWord(string $word): Word
     {
-        $query = $this->connection->prepare('INSERT INTO words (text) VALUES (:words_text)');
+        $queryString = $this->sqlQueryBuilder
+            ->insert('words', ['text'])
+            ->values(['(:words_text)'])
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute(['words_text' => $word]);
 
         $id = $this->connection->lastInsertId();
@@ -65,13 +88,23 @@ readonly class WordRepository
 
         $placeholders = rtrim(str_repeat('(?), ', count($words)), ', ');
 
-        $query = $this->connection->prepare("INSERT INTO words (text) VALUES {$placeholders}");
+        $queryString = $this->sqlQueryBuilder
+            ->insert('words', ['text'])
+            ->values([$placeholders])
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute($words);
     }
 
     public function getWordById(int $id): ?Word
     {
-        $query = $this->connection->prepare("SELECT * FROM words WHERE id = :id");
+        $queryString = $this->sqlQueryBuilder
+            ->select('words', ['*'])
+            ->where('id', ':id')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute(['id' => $id]);
 
         $result = $query->fetch(\PDO::FETCH_ASSOC);
@@ -85,7 +118,12 @@ readonly class WordRepository
 
     public function findWordByText(string $text): ?Word
     {
-        $query = $this->connection->prepare('SELECT * FROM words WHERE text = :text');
+        $queryString = $this->sqlQueryBuilder
+            ->select('words', ['*'])
+            ->where('text', ':text')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute(['text' => $text]);
 
         $result = $query->fetch(\PDO::FETCH_ASSOC);
@@ -99,7 +137,11 @@ readonly class WordRepository
 
     public function clearWordTable(): void
     {
-        $query = $this->connection->prepare('DELETE FROM words');
+        $queryString = $this->sqlQueryBuilder
+            ->delete('words')
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
         $query->execute();
     }
 }

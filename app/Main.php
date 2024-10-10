@@ -8,9 +8,7 @@ require_once 'Autoloader.php';
 
 use App\Database\DBConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
-use App\Database\QueryBuilder\SqlQueryBuilder;
 use App\Enumerators\AppType;
-use App\Exception\NotFoundException;
 use App\Logger\Handler\LogHandler;
 use App\Logger\Logger;
 use App\Providers\CliWordProvider;
@@ -45,27 +43,23 @@ class Main
         $loader->addNamespace('App', __DIR__);
 
         FileService::readEnvFile('/var/.env');
-        // ---------------
+
         $dbConnection = DBConnection::tryConnect();
 
-        $queryBuilder = new MySqlQueryBuilder();
-
-        $query = $queryBuilder
-            ->select('words', ['words.text, words.id'])
-            ->leftJoin('hyphenationdb.hyphenated_words hw', 'words.id = hw.word_id')
-            ->where('hw.word_id', 'IS NULL')
-            ->getSql();
-
-        $query = $dbConnection->prepare($query);
-        $query->execute();
-        $wordRows = $query->fetchAll(\PDO::FETCH_ASSOC);
-
-        echo $wordRows;
-        // -----------------
         $timer = new Timer();
         $handler = new LogHandler('/var/app_log.txt');
         $logger = new Logger($handler);
-        $wordRepository = new WordRepository($dbConnection, $logger);
+        $mySqlQueryBuilder = new MySqlQueryBuilder();
+
+
+        $placeholders = rtrim(str_repeat('(?), ', 30), ', ');
+
+        $queryString = $mySqlQueryBuilder
+            ->select('words', ['*'])
+            ->where('id', ':id')
+            ->getSql();
+
+        $wordRepository = new WordRepository($mySqlQueryBuilder, $dbConnection, $logger);
         $selectedSyllableRepository = new SelectedSyllableRepository($dbConnection);
         $hyphenatedWordRepository = new HyphenatedWordRepository($dbConnection);
         $syllableRepository = new SyllableRepository($dbConnection, $logger);
@@ -73,8 +67,9 @@ class Main
         $resultVisualizationService = new ResultVisualizationService($logger);
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
-        $userInputService->askAboutDatabaseFileUpdates();
-        $isDbSource = $userInputService->chooseHyphenationSource();
+//        $userInputService->askAboutDatabaseFileUpdates();
+//        $isDbSource = $userInputService->chooseHyphenationSource();
+        $isDbSource = true;
 
         $logger->logStartOfApp();
         $timer->startTimer();
@@ -127,6 +122,6 @@ class Main
 $app = new Main();
 //$app->run($argv);
 $app->run([
-    1 => 'word',
+    1 => 'database',
     2 => '/var/paragraph.txt',
 ]);

@@ -10,7 +10,7 @@ interface SqlQueryBuilder
     public function insert(string $table, array $fields): SqlQueryBuilder;
     public function where(string $field, string $value, string $operator = '='): SqlQueryBuilder;
     public function delete(string $table): SqlQueryBuilder;
-    public function update(string $table, array $comparisons): SqlQueryBuilder;
+    public function update(string $table, array $fields): SqlQueryBuilder;
     public function leftJoin(string $table, string $join): SqlQueryBuilder;
     public function getSql(): string;
 }

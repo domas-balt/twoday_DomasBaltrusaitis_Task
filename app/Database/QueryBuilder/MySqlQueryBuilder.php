@@ -47,7 +47,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
         }
 
         switch ($value) {
-            case str_starts_with($value, ':'):
+            case str_starts_with($value, ':') || str_contains($value, '?'):
                 $this->query->setWhere("$field $operator $value");
 
                 break;
