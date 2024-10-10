@@ -56,9 +56,9 @@ readonly class UserInputService
     {
         switch ($applicationType) {
             case 'file':
-                return AppType::File;
+                return AppType::FILE;
             case 'word':
-                return AppType::Word;
+                return AppType::WORD;
             case 'database':
                 return AppType::Database;
             default:

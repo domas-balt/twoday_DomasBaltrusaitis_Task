@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entities;
 
-readonly class Word
+readonly class Word implements \JsonSerializable
 {
     public function __construct(
         private int $id,
@@ -20,5 +20,10 @@ readonly class Word
     public function getText(): string
     {
         return $this->text;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return (object) get_object_vars($this);
     }
 }
