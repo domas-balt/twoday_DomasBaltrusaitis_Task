@@ -7,7 +7,7 @@ namespace App;
 require_once 'Autoloader.php';
 
 use App\Container\DependencyContainer;
-use App\Container\DependencySetter;
+use App\Container\DependencyConfigurator;
 use App\Database\DBConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Enumerators\AppType;
@@ -48,7 +48,7 @@ class Main
 
         $container = new DependencyContainer();
 
-        DependencySetter::setAllDependencies($container);
+        DependencyConfigurator::setAllDependencies($container);
 
         $timer = $container->get('timer');
         $logger = $container->get('logger');
@@ -97,8 +97,4 @@ class Main
 }
 
 $app = new Main();
-//$app->run($argv);
-$app->run([
-    1 => 'word',
-    2 => '/var/paragraph.txt'
-]);
+$app->run($argv);

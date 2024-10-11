@@ -9,12 +9,12 @@ use App\Entities\SelectedSyllable;
 use App\Entities\Syllable;
 use App\Logger\Logger;
 
-class SyllableRepository
+readonly class SyllableRepository
 {
     public function __construct(
         private SqlQueryBuilder $sqlQueryBuilder,
-        private readonly \PDO $connection,
-        private readonly Logger $logger,
+        private \PDO $connection,
+        private Logger $logger,
     ) {
     }
 

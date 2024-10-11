@@ -70,7 +70,7 @@ class MySqlQueryBuilder implements SqlQueryBuilder
     public function values(array $values): SqlQueryBuilder
     {
         if ($this->query->getType() != 'INSERT') {
-            throw new \Exception(<<<EOT
+            throw new \LogicException(<<<EOT
             Values can currently only be added alongside the
             INSERT statement and do not function as a standalone statement.'
             EOT);

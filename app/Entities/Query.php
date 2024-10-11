@@ -8,19 +8,14 @@ use App\Enumerators\SqlStatement;
 
 class Query
 {
-    private string $base;
-    private ?SqlStatement $type;
-    private array $where;
-    private array $values;
-    private string $leftJoin;
+    private string $base = '';
+    private ?SqlStatement $type = null;
+    private array $where = [];
+    private array $values = [];
+    private string $leftJoin = '';
 
-    public function __construct()
-    {
-        $this->base = '';
-        $this->type = null;
-        $this->leftJoin = '';
-        $this->where = [];
-        $this->values = [];
+    public function __construct(
+    ) {
     }
 
     public function getBase(): string
