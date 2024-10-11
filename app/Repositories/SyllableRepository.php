@@ -21,7 +21,7 @@ class SyllableRepository
     public function getAllSyllables(): array
     {
         $queryString = $this->sqlQueryBuilder
-            ->select('syllable', ['*'])
+            ->select('syllables', ['*'])
             ->getSql();
 
         $query = $this->connection->query($queryString);

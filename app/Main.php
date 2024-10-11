@@ -6,6 +6,8 @@ namespace App;
 
 require_once 'Autoloader.php';
 
+use App\Container\DependencyContainer;
+use App\Container\DependencySetter;
 use App\Database\DBConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Enumerators\AppType;
@@ -44,18 +46,15 @@ class Main
 
         FileService::readEnvFile('/var/.env');
 
-        $dbConnection = DBConnection::tryConnect();
+        $container = new DependencyContainer();
 
-        $timer = new Timer();
-        $handler = new LogHandler('/var/app_log.txt');
-        $logger = new Logger($handler);
-        $mySqlQueryBuilder = new MySqlQueryBuilder();
-        $wordRepository = new WordRepository($mySqlQueryBuilder, $dbConnection, $logger);
-        $selectedSyllableRepository = new SelectedSyllableRepository($mySqlQueryBuilder, $dbConnection);
-        $hyphenatedWordRepository = new HyphenatedWordRepository($mySqlQueryBuilder, $dbConnection);
-        $syllableRepository = new SyllableRepository($mySqlQueryBuilder, $dbConnection, $logger);
-        $userInputService = new UserInputService($wordRepository, $syllableRepository);
-        $resultVisualizationService = new ResultVisualizationService($logger);
+        DependencySetter::setAllDependencies($container);
+
+        $timer = $container->get('timer');
+        $logger = $container->get('logger');
+
+        $userInputService = $container->get('userInputService');
+        $resultVisualizationService = $container->get('resultVisualizationService');
 
         $applicationType = $userInputService->checkUserArgInput($argv[1]);
         $userInputService->askAboutDatabaseFileUpdates();
@@ -65,31 +64,19 @@ class Main
         $timer->startTimer();
 
         if ($applicationType === AppType::DATABASE) {
-            $transactionService = new TransactionService($hyphenatedWordRepository, $syllableRepository, $selectedSyllableRepository, $dbConnection);
-            $words = (new DatabaseWordProvider($wordRepository))->getWords();
-            $syllables = (new DatabaseSyllableProvider($syllableRepository))->getSyllables();
+            $words = ($container->get('databaseWordProvider'))->getWords();
 
-            $dbHyphenationManagementService = new DatabaseHyphenationManagementService(
-                $transactionService,
-                new ParagraphHyphenationService(new HyphenationService($syllables)),
-                $wordRepository,
-                $syllableRepository,
-                $hyphenatedWordRepository,
-            );
+            $dbHyphenationManagementService = $container->get('databaseHyphenationManagementService');
 
             $result = $dbHyphenationManagementService->manageHyphenation($words);
         } else {
             $words = $applicationType === AppType::FILE
-                ? (new FileWordProvider('/var/paragraph.txt'))->getWords()
-                : (new CliWordProvider($userInputService))->getWords();
+                ? ($container->get('fileWordProvider'))->getWords()
+                : ($container->get('cliWordProvider'))->getWords();
 
-            $syllables = $isDbSource
-                ? (new DatabaseSyllableProvider($syllableRepository))->getSyllables()
-                : (new FileSyllableProvider())->getSyllables();
-
-            $basicHyphenationManagementService = new BasicHyphenationManagementService(
-                new ParagraphHyphenationService(new HyphenationService($syllables))
-            );
+            $basicHyphenationManagementService = $isDbSource
+                ? $container->get('basicHyphenationManagementServiceDB')
+                : $container->get('basicHyphenationManagementServiceFile');
 
             $result = $basicHyphenationManagementService->manageHyphenation($words);
         }
@@ -110,4 +97,8 @@ class Main
 }
 
 $app = new Main();
-$app->run($argv);
+//$app->run($argv);
+$app->run([
+    1 => 'word',
+    2 => '/var/paragraph.txt'
+]);

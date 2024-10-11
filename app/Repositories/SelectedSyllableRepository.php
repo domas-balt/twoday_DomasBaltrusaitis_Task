@@ -24,7 +24,7 @@ readonly class SelectedSyllableRepository
 
         $queryString = $this->sqlQueryBuilder
             ->insert('selected_syllables', ['text'])
-            ->values([':selected_syllable_text'])
+            ->values(['(:selected_syllable_text)'])
             ->getSql();
 
         $query = $this->connection->prepare($queryString);

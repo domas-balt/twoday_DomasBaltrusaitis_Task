@@ -17,9 +17,10 @@ readonly class WordRepository
     ) {
     }
 
-    public function getAllWords(): array
+    public function getAllWords(bool $asString = false): array
     {
         $words = [];
+        $stringWords = [];
 
         $queryString = $this->sqlQueryBuilder
             ->select('words', ['words.text, words.id'])
@@ -34,9 +35,10 @@ readonly class WordRepository
 
         foreach ($wordRows as $wordRow) {
             $words[] = new Word($wordRow['id'], $wordRow['text']);
+            $stringWords[$wordRow['id']] = $wordRow['text'];
         }
 
-        return $words;
+        return $asString ? $stringWords : $words;
     }
 
     public function deleteWord($wordId): int

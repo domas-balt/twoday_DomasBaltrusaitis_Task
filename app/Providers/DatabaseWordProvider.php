@@ -15,6 +15,6 @@ class DatabaseWordProvider implements WordProviderInterface
 
     public function getWords(): array
     {
-        return $this->wordRepository->getAllWords();
+        return $this->wordRepository->getAllWords(true);
     }
 }
