@@ -21,10 +21,6 @@ class LocalServer
 {
     public function run(): void
     {
-        $loader = new Autoloader();
-        $loader->register();
-        $loader->addNamespace('App', __DIR__);
-
         FileService::readEnvFile('/var/.env');
 
         $dbConnection = DBConnection::tryConnect();

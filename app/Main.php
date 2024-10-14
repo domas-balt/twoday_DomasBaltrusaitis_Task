@@ -40,10 +40,6 @@ class Main
             throw new \Exception(\InvalidArgumentException::class);
         }
 
-        $loader = new Autoloader();
-        $loader->register();
-        $loader->addNamespace('App', __DIR__);
-
         FileService::readEnvFile('/var/.env');
 
         $container = new DependencyContainer();

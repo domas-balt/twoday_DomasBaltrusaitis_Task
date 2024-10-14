@@ -55,9 +55,8 @@ class DependencyConfigurator
         $dependencyContainer->set('wordRepository', function(DependencyContainer $dependencyContainer): WordRepository {
             $mySqlQueryBuilder = $dependencyContainer->get('mySqlQueryBuilder');
             $dbConnection = $dependencyContainer->get('database');
-            $logger = $dependencyContainer->get('logger');
 
-            return new WordRepository($mySqlQueryBuilder, $dbConnection, $logger);
+            return new WordRepository($mySqlQueryBuilder, $dbConnection);
         });
 
         $dependencyContainer->set('selectedSyllableRepository', function(DependencyContainer $dependencyContainer): SelectedSyllableRepository {
