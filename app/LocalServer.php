@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App;
 
-require_once 'Autoloader.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 use App\Controllers\WordController;
 use App\Database\DBConnection;
+use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Enumerators\HttpMethods;
 use App\Exception\HttpException;
-use App\Logger\Handler\LogHandler;
-use App\Logger\Logger;
 use App\Repositories\WordRepository;
 use App\Routes\Route;
 use App\Routes\RouteManager;
@@ -24,9 +23,8 @@ class LocalServer
         FileService::readEnvFile('/var/.env');
 
         $dbConnection = DBConnection::tryConnect();
-        $handler = new LogHandler('/var/app_log.txt');
-        $logger = new Logger($handler);
-        $wordRepository = new WordRepository($dbConnection, $logger);
+        $queryBuilder = new MySqlQueryBuilder();
+        $wordRepository = new WordRepository($queryBuilder, $dbConnection);
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
