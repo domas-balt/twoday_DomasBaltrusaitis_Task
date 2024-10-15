@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Database\QueryBuilder\SqlQueryBuilder;
 use App\Entities\SelectedSyllable;
 
 readonly class SelectedSyllableRepository
 {
     public function __construct(
+        private SqlQueryBuilder $sqlQueryBuilder,
         private \PDO $connection
     ) {
     }
@@ -20,7 +22,12 @@ readonly class SelectedSyllableRepository
     {
         $selectedSyllableIds = [];
 
-        $query = $this->connection->prepare('INSERT INTO selected_syllables (text) VALUES (:selected_syllable_text)');
+        $queryString = $this->sqlQueryBuilder
+            ->insert('selected_syllables', ['text'])
+            ->values(['(:selected_syllable_text)'])
+            ->getSql();
+
+        $query = $this->connection->prepare($queryString);
 
         foreach ($selectedSyllables as $selectedSyllable) {
             $query->execute(['selected_syllable_text' => $selectedSyllable->getText()]);
@@ -32,8 +39,12 @@ readonly class SelectedSyllableRepository
 
     public function insertSelectedSyllable(string $text): int
     {
-        $query = $this->connection->prepare('INSERT INTO selected_syllables (text) VALUES (:text)');
+        $queryString = $this->sqlQueryBuilder
+            ->insert('selected_syllables', ['text'])
+            ->values(['(:text)'])
+            ->getSql();
 
+        $query = $this->connection->prepare($queryString);
         $query->execute(['text' => $text]);
 
         return (int) $this->connection->lastInsertId();
