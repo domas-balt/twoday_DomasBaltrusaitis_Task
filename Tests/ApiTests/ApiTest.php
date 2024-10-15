@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ApiTests\ApiTest;
 
-use App\Database\DBConnection;
+use App\Database\DatabaseConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Repositories\WordRepository;
 use App\Services\FileService;
@@ -38,7 +38,7 @@ class ApiTest extends TestCase
         FileService::readEnvFile('/var/.env');
         $queryBuilder = new MySqlQueryBuilder();
 
-        self::$connection = DBConnection::tryConnect();
+        self::$connection = DatabaseConnection::tryConnect();
         self::$wordRepository = new WordRepository($queryBuilder, self::$connection);
     }
 

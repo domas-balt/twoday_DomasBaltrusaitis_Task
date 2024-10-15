@@ -7,7 +7,7 @@ namespace App;
 require_once __DIR__.'/../vendor/autoload.php';
 
 use App\Controllers\WordController;
-use App\Database\DBConnection;
+use App\Database\DatabaseConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Enumerators\HttpMethods;
 use App\Exception\HttpException;
@@ -22,9 +22,9 @@ class LocalServer
     {
         FileService::readEnvFile('/var/.env');
 
-        $dbConnection = DBConnection::tryConnect();
+        $databaseConnection = DatabaseConnection::tryConnect();
         $queryBuilder = new MySqlQueryBuilder();
-        $wordRepository = new WordRepository($queryBuilder, $dbConnection);
+        $wordRepository = new WordRepository($queryBuilder, $databaseConnection);
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
