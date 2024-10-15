@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\ProviderTests;
 
-use App\Providers\DatabaseWordProvider;
-use App\Repositories\WordRepository;
+use App\Server\Providers\DatabaseWordProvider;
+use App\Server\Repositories\WordRepository;
 use PHPUnit\Framework\TestCase;
 
 class DatabaseWordProviderTest extends TestCase

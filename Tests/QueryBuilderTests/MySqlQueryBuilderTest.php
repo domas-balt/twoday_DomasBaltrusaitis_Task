@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\QueryBuilderTests;
 
-use App\Database\QueryBuilder\MySqlQueryBuilder;
-use App\Entities\Query;
+use App\Server\Database\QueryBuilder\MySqlQueryBuilder;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

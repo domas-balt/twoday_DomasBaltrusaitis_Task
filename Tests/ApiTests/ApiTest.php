@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace ApiTests\ApiTest;
 
-use App\Database\DatabaseConnection;
-use App\Database\QueryBuilder\MySqlQueryBuilder;
-use App\Repositories\WordRepository;
-use App\Services\FileService;
+use App\Server\Database\DatabaseConnection;
+use App\Server\Database\QueryBuilder\MySqlQueryBuilder;
+use App\Server\Repositories\WordRepository;
+use App\Server\Services\FileService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

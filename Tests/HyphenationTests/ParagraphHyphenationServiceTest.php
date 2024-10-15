@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\HyphenationTests;
 
-use App\Services\HyphenationService;
-use App\Services\ParagraphHyphenationService;
+use App\Server\Services\HyphenationService;
+use App\Server\Services\ParagraphHyphenationService;
 use PHPUnit\Framework\TestCase;
 
 class ParagraphHyphenationServiceTest extends TestCase

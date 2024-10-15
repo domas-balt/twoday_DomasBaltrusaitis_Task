@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\QueryBuilderTests;
 
-use App\Entities\Query;
-use App\Enumerators\SqlStatement;
+use App\Server\Entities\Query;
+use App\Server\Enumerators\SqlStatement;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase
