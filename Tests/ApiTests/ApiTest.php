@@ -8,6 +8,7 @@ use App\Database\DatabaseConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Repositories\WordRepository;
 use App\Services\FileService;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ApiTest extends TestCase
@@ -86,5 +87,41 @@ class ApiTest extends TestCase
         ];
 
         $this->assertSame($expectedValues, $data);
+    }
+
+    #[DataProvider('provideTestGet')]
+    public function testGet($id, $expectedWord): void
+    {
+        $uri = "http://127.0.0.1:8000/words/{$id}";
+
+        $context_options = [
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'Content-Type' => 'application/json',
+                ]
+            ]
+        ];
+
+        $context = stream_context_create($context_options);
+        $stream = fopen($uri, 'r', false, $context);
+
+        $data = json_decode(stream_get_contents($stream), true);
+
+        $this->assertSame($expectedWord, $data['text']);
+    }
+
+    public static function provideTestGet(): array
+    {
+        return [
+            [
+                1,
+                'testword1'
+            ],
+            [
+                2,
+                'testword2'
+            ],
+        ];
     }
 }
