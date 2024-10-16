@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Server;
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Server\Container\DependencyConfigurator;
 use App\Server\Container\DependencyContainer;

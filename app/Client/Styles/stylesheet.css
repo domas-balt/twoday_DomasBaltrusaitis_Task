@@ -1,0 +1,22 @@
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    border-color: #96D4D4;
+    padding: 10px;
+}
+
+.content {
+    margin: auto;
+    text-align: center;
+}
+
+table {
+    margin: 0 auto;
+}
+
+body {
+    text-align: center;
+}
+form {
+    display: inline-block;
+}

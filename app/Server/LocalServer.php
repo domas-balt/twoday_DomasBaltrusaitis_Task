@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Server;
 
-require_once __DIR__.'/../vendor/autoload.php';
-
+require_once __DIR__ . '/../../vendor/autoload.php';
 use App\Server\Controllers\WordController;
 use App\Server\Database\DatabaseConnection;
 use App\Server\Database\QueryBuilder\MySqlQueryBuilder;
@@ -20,6 +19,15 @@ class LocalServer
 {
     public function run(): void
     {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE');
+
+        $request = $_SERVER['REQUEST_METHOD'];
+
+        if ($request === 'OPTIONS') {
+            return;
+        }
+
         FileService::readEnvFile('/var/.env');
 
         $databaseConnection = DatabaseConnection::tryConnect();
@@ -42,7 +50,6 @@ class LocalServer
 
         try {
             header("Content-Type: application/json; charset=UTF-8");
-            header('Access-Control-Allow-Origin: *');
 
             $response = $routeManager->processRequest($uri, $_SERVER['REQUEST_METHOD']);
             http_response_code($response->getResponseCode());
