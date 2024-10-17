@@ -10,21 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class ParagraphHyphenationServiceTest extends TestCase
 {
-    public function testGetSyllables(): void
-    {
-        $hyphenationServiceMock = $this->createMock(HyphenationService::class);
-
-        $hyphenationServiceMock
-            ->method('getSyllables')
-            ->willReturn(['.ach4', '.ad4der', '.af1t', '.al3t', '.am5at']);
-
-        $paragraphHyphenationService = new ParagraphHyphenationService($hyphenationServiceMock);
-
-        $syllables = $paragraphHyphenationService->getSyllables();
-
-        $this->assertSame(['.ach4', '.ad4der', '.af1t', '.al3t', '.am5at'], $syllables);
-    }
-
     public function testHyphenateParagraph(): void
     {
         $hyphenationServiceMock = $this->createMock(HyphenationService::class);

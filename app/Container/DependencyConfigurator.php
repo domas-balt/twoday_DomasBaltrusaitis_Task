@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Container;
 
+use App\Controllers\WordController;
 use App\Database\DatabaseConnection;
 use App\Database\QueryBuilder\MySqlQueryBuilder;
 use App\Logger\Handler\LogHandler;
@@ -185,6 +186,12 @@ class DependencyConfigurator
             $databaseParagraphHyphenationService = $dependencyContainer->get('databaseParagraphHyphenationService');
 
             return new BasicHyphenationManagementService($databaseParagraphHyphenationService);
+        });
+
+        $dependencyContainer->set('wordController', function(DependencyContainer $dependencyContainer) {
+            $wordRepository = $dependencyContainer->get('wordRepository');
+
+            return new WordController($wordRepository);
         });
     }
 }

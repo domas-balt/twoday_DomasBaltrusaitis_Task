@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Tests\QueryBuilderTests;
 
 use App\Database\QueryBuilder\MySqlQueryBuilder;
-use App\Entities\Query;
-use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\DataProviderExternal;
 use PHPUnit\Framework\TestCase;
 
 class MySqlQueryBuilderTest extends TestCase
@@ -56,8 +55,8 @@ class MySqlQueryBuilderTest extends TestCase
             ->getSql();
     }
 
-    #[DataProvider('provideWhereSymbolConditions')]
-    public function testWhereConditionsWithSymbols(string $expectedResult, $condition): void
+    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'provideWhereSymbolConditions')]
+    public function testWhereConditionsWithSymbols(string $expectedResult, string $condition): void
     {
         $queryBuilder = new MySqlQueryBuilder();
 
@@ -69,26 +68,8 @@ class MySqlQueryBuilderTest extends TestCase
         $this->assertEquals($expectedResult, $query);
     }
 
-    public static function provideWhereSymbolConditions(): array
-    {
-        return [
-            [
-                'SELECT id FROM words WHERE words.text = ?;',
-                '?'
-            ],
-            [
-                'SELECT id FROM words WHERE words.text = :word;',
-                ':word'
-            ],
-            [
-                "SELECT id FROM words WHERE words.text = 'word';",
-                'word'
-            ]
-        ];
-    }
-
-    #[DataProvider('provideWhereSymbolOperatorConditions')]
-    public function testWhereConditionsWithOperators(string $expectedResult, $condition, $operator): void
+    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'provideWhereSymbolOperatorConditions')]
+    public function testWhereConditionsWithOperators(string $expectedResult, string $condition, string $operator): void
     {
         $queryBuilder = new MySqlQueryBuilder();
 
@@ -100,28 +81,7 @@ class MySqlQueryBuilderTest extends TestCase
         $this->assertEquals($expectedResult, $query);
     }
 
-    public static function provideWhereSymbolOperatorConditions(): array
-    {
-        return [
-            [
-                'SELECT id FROM words WHERE words.text IN (?, ?);',
-                '?, ?',
-                'IN'
-            ],
-            [
-                'SELECT id FROM words WHERE words.text IS NULL;',
-                ' ',
-                'IS NULL'
-            ],
-            [
-                'SELECT id FROM words WHERE words.text IS NOT NULL;',
-                ' ',
-                'IS NOT NULL'
-            ]
-        ];
-    }
-
-    public function testValuesExpectException(): void
+    public function testValuesIfClauseNotInsert(): void
     {
         $queryBuilder = new MySqlQueryBuilder();
 
@@ -178,10 +138,16 @@ class MySqlQueryBuilderTest extends TestCase
             ->where('hw.id', '', 'IS NULL')
             ->getSql();
 
-        $this->assertEquals('SELECT syllable.text, syllables.id FROM syllables LEFT JOIN hyphenationdb.hyphenated_words hw ON syllables.id = hw.id WHERE hw.id IS NULL ;', $query);
+        $this->assertEquals('SELECT syllable.text, syllables.id '.
+            'FROM syllables ' .
+            'LEFT JOIN hyphenationdb.hyphenated_words hw ' .
+            'ON syllables.id = hw.id ' .
+            'WHERE hw.id IS NULL ;',
+            $query
+        );
     }
 
-    public function testLeftJoinExpectException(): void
+    public function testLeftJoinIfClauseIsInsert(): void
     {
         $queryBuilder = new MySqlQueryBuilder();
 
@@ -192,39 +158,9 @@ class MySqlQueryBuilderTest extends TestCase
             ->leftJoin('words w', 'syllables.id = w.id');
     }
 
-    #[DataProvider('provideQuery')]
+    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'provideQuery')]
     public function testGetSql(string $query, string $expectedResult): void
     {
         $this->assertEquals($expectedResult, $query);
-    }
-
-    public static function provideQuery(): array
-    {
-        $queryBuilder = new MySqlQueryBuilder();
-
-        return [
-            [
-                $queryBuilder
-                    ->select('words', ['id'])
-                    ->where('words.id', ' ', 'IS NULL')
-                    ->getSql(),
-                'SELECT id FROM words WHERE words.id IS NULL;'
-            ],
-            [
-                $queryBuilder
-                    ->select('syllables', ['syllable.text, syllables.id'])
-                    ->leftJoin('hyphenationdb.hyphenated_words hw', 'syllables.id = hw.id')
-                    ->where('hw.id', ' ', 'IS NULL')
-                    ->getSql(),
-                'SELECT syllable.text, syllables.id FROM syllables LEFT JOIN hyphenationdb.hyphenated_words hw ON syllables.id = hw.id WHERE hw.id IS NULL;'
-            ],
-            [
-                $queryBuilder
-                    ->insert('words', ['text'])
-                    ->values(['word1', 'word2'])
-                    ->getSql(),
-                'INSERT INTO words (text) VALUES word1, word2;'
-            ]
-        ];
     }
 }

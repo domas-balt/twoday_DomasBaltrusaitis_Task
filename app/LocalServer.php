@@ -6,12 +6,10 @@ namespace App;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-use App\Controllers\WordController;
-use App\Database\DatabaseConnection;
-use App\Database\QueryBuilder\MySqlQueryBuilder;
+use App\Container\DependencyConfigurator;
+use App\Container\DependencyContainer;
 use App\Enumerators\HttpMethods;
 use App\Exception\HttpException;
-use App\Repositories\WordRepository;
 use App\Routes\Route;
 use App\Routes\RouteManager;
 use App\Services\FileService;
@@ -20,15 +18,14 @@ class LocalServer
 {
     public function run(): void
     {
-        FileService::readEnvFile('/var/.env');
+        FileService::readEnvFile('/Server/var/.env');
 
-        $databaseConnection = DatabaseConnection::tryConnect();
-        $queryBuilder = new MySqlQueryBuilder();
-        $wordRepository = new WordRepository($queryBuilder, $databaseConnection);
+        $container = new DependencyContainer();
+        DependencyConfigurator::setAllDependencies($container);
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        $wordController = new WordController($wordRepository);
+        $wordController = $container->get('wordController');
 
         $wordRoutes = [
             new Route(HttpMethods::GET, '/words', $wordController, 'getAll'),
