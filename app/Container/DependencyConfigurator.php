@@ -142,25 +142,25 @@ class DependencyConfigurator
             return new HyphenationService($databaseSyllableProvider->getSyllables());
         });
 
-        $dependencyContainer->set('fileHyphenationService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('fileHyphenationService', function(DependencyContainer $dependencyContainer): HyphenationService {
             $fileSyllableProvider = $dependencyContainer->get('fileSyllableProvider');
 
             return new HyphenationService($fileSyllableProvider->getSyllables());
         });
 
-        $dependencyContainer->set('databaseParagraphHyphenationService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('databaseParagraphHyphenationService', function(DependencyContainer $dependencyContainer): ParagraphHyphenationService {
             $databaseHyphenationService = $dependencyContainer->get('databaseHyphenationService');
 
             return new ParagraphHyphenationService($databaseHyphenationService);
         });
 
-        $dependencyContainer->set('fileParagraphHyphenationService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('fileParagraphHyphenationService', function(DependencyContainer $dependencyContainer): ParagraphHyphenationService {
             $fileHyphenationService = $dependencyContainer->get('fileHyphenationService');
 
             return new ParagraphHyphenationService($fileHyphenationService);
         });
 
-        $dependencyContainer->set('databaseHyphenationManagementService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('databaseHyphenationManagementService', function(DependencyContainer $dependencyContainer): DatabaseHyphenationManagementService {
             $transactionService = $dependencyContainer->get('transactionService');
             $databaseParagraphHyphenationService = $dependencyContainer->get('databaseParagraphHyphenationService');
             $wordRepository = $dependencyContainer->get('wordRepository');
@@ -176,19 +176,19 @@ class DependencyConfigurator
             );
         });
 
-        $dependencyContainer->set('fileBasicHyphenationManagementService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('fileBasicHyphenationManagementService', function(DependencyContainer $dependencyContainer): BasicHyphenationManagementService {
             $fileParagraphHyphenationService = $dependencyContainer->get('fileParagraphHyphenationService');
 
             return new BasicHyphenationManagementService($fileParagraphHyphenationService);
         });
 
-        $dependencyContainer->set('databaseBasicHyphenationManagementService', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('databaseBasicHyphenationManagementService', function(DependencyContainer $dependencyContainer): BasicHyphenationManagementService {
             $databaseParagraphHyphenationService = $dependencyContainer->get('databaseParagraphHyphenationService');
 
             return new BasicHyphenationManagementService($databaseParagraphHyphenationService);
         });
 
-        $dependencyContainer->set('wordController', function(DependencyContainer $dependencyContainer) {
+        $dependencyContainer->set('wordController', function(DependencyContainer $dependencyContainer): WordController {
             $wordRepository = $dependencyContainer->get('wordRepository');
 
             return new WordController($wordRepository);

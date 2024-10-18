@@ -55,7 +55,7 @@ class MySqlQueryBuilderTest extends TestCase
             ->getSql();
     }
 
-    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'provideWhereSymbolConditions')]
+    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'whereConditionsWithSymbols')]
     public function testWhereConditionsWithSymbols(string $expectedResult, string $condition): void
     {
         $queryBuilder = new MySqlQueryBuilder();
@@ -68,7 +68,7 @@ class MySqlQueryBuilderTest extends TestCase
         $this->assertEquals($expectedResult, $query);
     }
 
-    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'provideWhereSymbolOperatorConditions')]
+    #[DataProviderExternal(MySqlQueryBuilderDataProviders::class, 'whereConditionsWithOperators')]
     public function testWhereConditionsWithOperators(string $expectedResult, string $condition, string $operator): void
     {
         $queryBuilder = new MySqlQueryBuilder();

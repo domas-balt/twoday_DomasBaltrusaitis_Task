@@ -10,7 +10,6 @@ use PHPUnit\Framework\Attributes\DataProviderExternal;
 
 class WordApiTest extends ApiTest
 {
-    private static \PDO $connection;
     private static WordRepository $wordRepository;
 
     public function setUp(): void
@@ -18,11 +17,11 @@ class WordApiTest extends ApiTest
         $data = [
             [
                 'id' => 1,
-                'text' => 'testword1'
+                'text' => 'testword1',
             ],
             [
                 'id' => 2,
-                'text' => 'testword2'
+                'text' => 'testword2',
             ]
         ];
 
@@ -33,8 +32,7 @@ class WordApiTest extends ApiTest
 
     public static function setUpBeforeClass(): void
     {
-        self::$connection = self::setupEnvironmentAndConnection();
-
+        parent::setUpBeforeClass();
         $queryBuilder = new MySqlQueryBuilder();
         self::$wordRepository = new WordRepository($queryBuilder, self::$connection);
     }
@@ -46,7 +44,7 @@ class WordApiTest extends ApiTest
 
     public function testGetAll(): void
     {
-        $uri = 'http://127.0.0.1:8000/words';
+        $uri = getenv('APP_URI') . '/words';
 
         $data = $this->makeGetRequest($uri);
 
@@ -64,10 +62,10 @@ class WordApiTest extends ApiTest
         $this->assertSame($expectedValues, $data);
     }
 
-    #[DataProviderExternal(WordApiDataProvider::class ,'provideTestGet')]
+    #[DataProviderExternal(WordApiDataProvider::class ,'testGet')]
     public function testGet(int $id, string $expectedValue): void
     {
-        $uri = "http://127.0.0.1:8000/words/{$id}";
+        $uri = getenv('APP_URI') .  "/words/{$id}";
 
         $data = $this->makeGetRequest($uri);
 

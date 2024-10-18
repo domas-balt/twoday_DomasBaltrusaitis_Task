@@ -36,7 +36,7 @@ class DatabaseHyphenationManagementServiceTest extends TestCase
                 new SelectedSyllable(1, 'Tes'),
                 new SelectedSyllable(2, 'tuo'),
                 new SelectedSyllable(3, 'ja'),
-                new SelectedSyllable(4, 'mas')
+                new SelectedSyllable(4, 'mas'),
             ]);
 
         $transactionServiceMock = $this->createMock(TransactionService::class);

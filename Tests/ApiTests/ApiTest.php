@@ -9,14 +9,13 @@ use PHPUnit\Framework\TestCase;
 
 abstract class ApiTest extends TestCase
 {
-    abstract protected function testGet(int $id, string $expectedValue): void;
-    abstract protected function testGetAll(): void;
+    protected static \PDO $connection;
 
-    protected static function setupEnvironmentAndConnection(): \PDO
+    public static function setUpBeforeClass(): void
     {
         FileService::readEnvFile('/Server/var/.env');
 
-        return DatabaseConnection::tryConnect();
+        self::$connection = DatabaseConnection::tryConnect();
     }
 
     protected function makeGetRequest(string $uri): mixed

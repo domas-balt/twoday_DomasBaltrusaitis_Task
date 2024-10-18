@@ -8,7 +8,7 @@ use App\Database\QueryBuilder\MySqlQueryBuilder;
 
 class MySqlQueryBuilderDataProviders
 {
-    public static function provideWhereSymbolConditions(): array
+    public static function whereConditionsWithSymbols(): array
     {
         return [
             'WHERE clause with ? symbol' => [
@@ -26,7 +26,7 @@ class MySqlQueryBuilderDataProviders
         ];
     }
 
-    public static function provideWhereSymbolOperatorConditions(): array
+    public static function whereConditionsWithOperators(): array
     {
         return [
             'WHERE clause with IN operator' => [
@@ -80,6 +80,4 @@ class MySqlQueryBuilderDataProviders
             ]
         ];
     }
-
-
 }

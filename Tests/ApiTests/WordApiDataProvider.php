@@ -6,16 +6,16 @@ namespace Tests\ApiTests;
 
 class WordApiDataProvider
 {
-    public static function provideTestGet(): array
+    public static function testGet(): array
     {
         return [
             'First entity to be tested in Get()' => [
                 1,
-                'testword1'
+                'testword1',
             ],
             'Second entity to be tested in Get()' => [
                 2,
-                'testword2'
+                'testword2',
             ],
         ];
     }
