@@ -6,7 +6,7 @@ table, th, td {
 }
 
 .content {
-    margin: auto;
+    margin-top: 20px;
     text-align: center;
 }
 
@@ -14,9 +14,18 @@ table {
     margin: 0 auto;
 }
 
+label, input {
+    display:block;
+}
+
 body {
     text-align: center;
 }
+
 form {
     display: inline-block;
+}
+
+input {
+    margin: 20px;
 }

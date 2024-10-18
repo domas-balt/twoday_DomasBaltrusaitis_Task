@@ -1,8 +1,8 @@
-
+const uri = 'http://127.0.0.1:8000';
 
 async function getAllWords() {
     try {
-        fetch('http://127.0.0.1:8000/words', {
+        fetch(uri + '/words', {
             method: 'GET',
         }).then(response => response.json())
             .then(data => append_json_data(data))
@@ -12,7 +12,6 @@ async function getAllWords() {
 }
 
 function append_json_data(data){
-    console.log(data)
     var table = document.getElementById('listTable');
     data.forEach((object) => {
         var tr = document.createElement('tr');

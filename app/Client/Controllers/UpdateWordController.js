@@ -1,4 +1,3 @@
-
 function toggleUpdate(id, word) {
     let listDiv = document.getElementById('contentDiv')
     let div = document.createElement('div')
@@ -9,9 +8,9 @@ function toggleUpdate(id, word) {
 }
 
 function updateData(id, word){
-    let url = `http://127.0.0.1:8000/words/${id}`
+    let route = uri + `/words/${id}`
     let wordNew = document.getElementById('wordUpdate').value;
-    fetch(url, {
+    fetch(route, {
         method: 'PUT',
         body: JSON.stringify({text: wordNew})
     });
