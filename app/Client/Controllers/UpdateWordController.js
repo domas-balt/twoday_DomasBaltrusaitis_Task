@@ -9,7 +9,7 @@ function toggleUpdate(id, word) {
 }
 
 function updateData(id, word){
-    let url = `http://127.0.0.1:8000/words/${id}`
+    let url = `http://localhost:8000/words/${id}`
     let wordNew = document.getElementById('wordUpdate').value;
     fetch(url, {
         method: 'PUT',

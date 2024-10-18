@@ -4,7 +4,7 @@ async function sendData() {
     const formData = new FormData(form);
 
     try {
-        await fetch('http://127.0.0.1:8000/words', {
+        await fetch('http://localhost:8000/words', {
             method: 'POST',
             body: JSON.stringify({text: formData.get('word')})
         });
